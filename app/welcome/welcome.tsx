@@ -2,12 +2,10 @@ import React from 'react';
 
 export function Welcome({ message }: { message: string }) {
   const workflowSteps = [
-    { title: "Campaign Input", desc: "Meta campaign parameters", icon: "📊" },
-    { title: "AI Creative Gen", desc: "OpenAI generates ads", icon: "🎨" },
-    { title: "Approve & Launch", desc: "Review and deploy", icon: "🚀" },
-    { title: "Campaign CRM", desc: "Lead management", icon: "📈" },
-    { title: "AI Outreach", desc: "Personalized comms", icon: "💬" },
-    { title: "Contact Schedule", desc: "Automated drips", icon: "📅" }
+    { title: "Lead Generation", desc: "Meta & multi-channel lead capture", icon: "🎯" },
+    { title: "Campaign CRM", desc: "Intelligent lead management", icon: "📊" },
+    { title: "Smart Contact Scheduling", desc: "Powered by Anthropic AI", icon: "📅" },
+    { title: "Automated Creative Suite", desc: "Powered by OpenAI", icon: "🎨" }
   ];
 
   const stats = [
@@ -129,7 +127,7 @@ export function Welcome({ message }: { message: string }) {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
             {workflowSteps.map((step, i) => (
               <div key={i} className="group relative bg-slate-800 rounded-xl p-6 border border-slate-700 text-center cursor-pointer transition-all duration-200 hover:border-green-500 hover:shadow-lg hover:shadow-green-500/20 hover:-translate-y-1">
                 <div className="text-3xl mb-3">{step.icon}</div>
@@ -139,9 +137,6 @@ export function Welcome({ message }: { message: string }) {
                 <p className="text-xs text-slate-400">
                   {step.desc}
                 </p>
-                {i < workflowSteps.length - 1 && (
-                  <div className="hidden lg:block absolute top-1/2 -right-3 w-6 h-0.5 bg-slate-600"></div>
-                )}
               </div>
             ))}
           </div>
