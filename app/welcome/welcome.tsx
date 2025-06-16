@@ -195,12 +195,11 @@ export function Welcome({ message }: { message: string }) {
                 <img 
                   src="/logo-dark.svg" 
                   alt="LeadFlare" 
-                  className="h-6"
+                  className="h-12"
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
                   }}
                 />
-                <span className="font-semibold">LeadFlare</span>
               </div>
               <p className="text-slate-400 text-sm">
                 AI-powered campaign management for the modern call center.
