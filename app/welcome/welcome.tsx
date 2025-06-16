@@ -1,90 +1,252 @@
-import logoDark from "./logo-dark.svg";
-import logoLight from "./logo-light.svg";
+import React from 'react';
 
 export function Welcome({ message }: { message: string }) {
+  const workflowSteps = [
+    { title: "Campaign Input", desc: "Meta campaign parameters", icon: "📊" },
+    { title: "AI Creative Gen", desc: "OpenAI generates ads", icon: "🎨" },
+    { title: "Approve & Launch", desc: "Review and deploy", icon: "🚀" },
+    { title: "Campaign CRM", desc: "Lead management", icon: "📈" },
+    { title: "AI Outreach", desc: "Personalized comms", icon: "💬" },
+    { title: "Contact Schedule", desc: "Automated drips", icon: "📅" }
+  ];
+
+  const stats = [
+    { label: "Active Campaigns", value: "247", change: "+12%" },
+    { label: "Leads Generated", value: "15.2K", change: "+23%" },
+    { label: "Conversion Rate", value: "8.4%", change: "+1.2%" },
+    { label: "ROI", value: "340%", change: "+45%" }
+  ];
+
   return (
-    <main className="flex items-center justify-center pt-16 pb-4">
-      <div className="flex-1 flex flex-col items-center gap-16 min-h-0">
-        <header className="flex flex-col items-center gap-9">
-          <div className="w-[500px] max-w-[100vw] p-4">
-            <img
-              src={logoLight}
-              alt="React Router"
-              className="block w-full dark:hidden"
+    <div className="min-h-screen bg-slate-900 text-white font-sans">
+      
+      {/* Navigation */}
+      <nav className="border-b border-slate-700 bg-slate-900/80 backdrop-blur-sm px-6">
+        <div className="max-w-7xl mx-auto flex items-center justify-between h-16">
+          <div className="flex items-center gap-3">
+            <img 
+              src="/logo-dark.svg" 
+              alt="LeadFlare" 
+              className="h-8"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
             />
-            <img
-              src={logoDark}
-              alt="React Router"
-              className="hidden w-full dark:block"
-            />
+            <span className="text-xl font-semibold">LeadFlare</span>
           </div>
-        </header>
-        <div className="max-w-[300px] w-full space-y-6 px-4">
-          <nav className="rounded-3xl border border-gray-200 p-6 dark:border-gray-700 space-y-4">
-            <p className="leading-6 text-gray-700 dark:text-gray-200 text-center">
-              What&apos;s next?
-            </p>
-            <ul>
-              {resources.map(({ href, text, icon }) => (
-                <li key={href}>
-                  <a
-                    className="group flex items-center gap-3 self-stretch p-3 leading-normal text-blue-700 hover:underline dark:text-blue-500"
-                    href={href}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {icon}
-                    {text}
-                  </a>
-                </li>
-              ))}
-              <li className="self-stretch p-3 leading-normal">{message}</li>
-            </ul>
-          </nav>
+          <div className="flex items-center gap-4">
+            <button className="text-slate-400 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
+              Docs
+            </button>
+            <button className="text-slate-400 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
+              Support
+            </button>
+            <button className="bg-green-500 hover:bg-green-600 text-slate-900 px-4 py-2 rounded-md text-sm font-semibold transition-colors">
+              Sign In
+            </button>
+          </div>
         </div>
-      </div>
-    </main>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="py-24 px-6 max-w-7xl mx-auto">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          
+          {/* Left Column */}
+          <div>
+            <h1 className="text-5xl lg:text-6xl font-extrabold leading-tight mb-6 bg-gradient-to-r from-white to-green-400 bg-clip-text text-transparent">
+              AI-Powered Campaign Management for Call Centers
+            </h1>
+            
+            <p className="text-xl text-slate-300 mb-8 leading-relaxed">
+              From Meta campaign creation to lead nurturing - automate your entire workflow with AI-generated creatives, intelligent CRM, and advanced contact scheduling.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 mb-8">
+              <button className="bg-green-500 hover:bg-green-600 text-slate-900 px-8 py-4 rounded-lg text-lg font-bold transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-green-500/25">
+                Create Campaign Now
+              </button>
+              <button className="border-2 border-green-500 hover:border-green-400 text-green-400 hover:text-green-300 hover:bg-green-500/10 px-8 py-4 rounded-lg text-lg font-semibold transition-all duration-200">
+                Manage Campaigns
+              </button>
+            </div>
+
+            <p className="text-sm text-slate-500">
+              Server Status: <span className="text-green-400">{message || "Connected to Cloudflare Edge"}</span>
+            </p>
+          </div>
+
+          {/* Right Column - Dashboard Preview */}
+          <div className="relative">
+            <div className="bg-slate-800 rounded-xl border border-slate-700 p-6 shadow-2xl">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">Campaign Dashboard</h3>
+                <div className="flex gap-1.5">
+                  <div className="w-2.5 h-2.5 bg-red-500 rounded-full"></div>
+                  <div className="w-2.5 h-2.5 bg-yellow-500 rounded-full"></div>
+                  <div className="w-2.5 h-2.5 bg-green-500 rounded-full"></div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3 mb-6">
+                {stats.map((stat, i) => (
+                  <div key={i} className="bg-slate-900 rounded-lg p-4 border border-slate-700">
+                    <div className="text-2xl font-bold text-green-400 mb-1">
+                      {stat.value}
+                    </div>
+                    <div className="text-xs text-slate-300 mb-0.5">
+                      {stat.label}
+                    </div>
+                    <div className="text-xs text-green-400">
+                      {stat.change}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div>
+                <div className="flex justify-between text-sm mb-2">
+                  <span className="text-slate-300">Active: Tech Startup Leads</span>
+                  <span className="text-green-400">86% CTR</span>
+                </div>
+                <div className="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                  <div className="w-5/6 h-full bg-gradient-to-r from-green-400 to-green-600 rounded-full"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* AI Workflow Section */}
+      <section className="py-16 px-6 bg-slate-800/50 border-t border-b border-slate-700">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold mb-4">
+              Complete AI Workflow
+            </h2>
+            <p className="text-xl text-slate-300">
+              End-to-end campaign management powered by OpenAI and Anthropic
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+            {workflowSteps.map((step, i) => (
+              <div key={i} className="group relative bg-slate-800 rounded-xl p-6 border border-slate-700 text-center cursor-pointer transition-all duration-200 hover:border-green-500 hover:shadow-lg hover:shadow-green-500/20 hover:-translate-y-1">
+                <div className="text-3xl mb-3">{step.icon}</div>
+                <h3 className="text-sm font-semibold mb-2">
+                  {step.title}
+                </h3>
+                <p className="text-xs text-slate-400">
+                  {step.desc}
+                </p>
+                {i < workflowSteps.length - 1 && (
+                  <div className="hidden lg:block absolute top-1/2 -right-3 w-6 h-0.5 bg-slate-600"></div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-16 px-6 max-w-7xl mx-auto">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          
+          <div className="bg-slate-800 rounded-xl p-8 border border-slate-700">
+            <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center text-2xl mb-4">
+              🤖
+            </div>
+            <h3 className="text-xl font-semibold mb-3">
+              AI Creative Generation
+            </h3>
+            <p className="text-slate-300 leading-relaxed">
+              OpenAI generates compelling ad copy and visuals tailored to your target market and campaign objectives.
+            </p>
+          </div>
+
+          <div className="bg-slate-800 rounded-xl p-8 border border-slate-700">
+            <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center text-2xl mb-4">
+              📊
+            </div>
+            <h3 className="text-xl font-semibold mb-3">
+              Smart CRM
+            </h3>
+            <p className="text-slate-300 leading-relaxed">
+              Advanced lead management with AI-powered scoring, segmentation, and automated follow-up sequences.
+            </p>
+          </div>
+
+          <div className="bg-slate-800 rounded-xl p-8 border border-slate-700">
+            <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center text-2xl mb-4">
+              ⚡
+            </div>
+            <h3 className="text-xl font-semibold mb-3">
+              Multi-Channel Outreach
+            </h3>
+            <p className="text-slate-300 leading-relaxed">
+              Coordinated email, SMS, and call scheduling powered by Anthropic's advanced language models.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-slate-700 bg-slate-900/80 py-12 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <img 
+                  src="/logo-dark.svg" 
+                  alt="LeadFlare" 
+                  className="h-6"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+                <span className="font-semibold">LeadFlare</span>
+              </div>
+              <p className="text-slate-400 text-sm">
+                AI-powered campaign management for the modern call center.
+              </p>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mb-3">Product</h4>
+              <ul className="space-y-2 text-sm text-slate-400">
+                <li><a href="#" className="hover:text-green-400 transition-colors">Features</a></li>
+                <li><a href="#" className="hover:text-green-400 transition-colors">Pricing</a></li>
+                <li><a href="#" className="hover:text-green-400 transition-colors">API</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mb-3">Support</h4>
+              <ul className="space-y-2 text-sm text-slate-400">
+                <li><a href="#" className="hover:text-green-400 transition-colors">Documentation</a></li>
+                <li><a href="#" className="hover:text-green-400 transition-colors">Guides</a></li>
+                <li><a href="#" className="hover:text-green-400 transition-colors">Contact</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mb-3">Company</h4>
+              <ul className="space-y-2 text-sm text-slate-400">
+                <li><a href="#" className="hover:text-green-400 transition-colors">About</a></li>
+                <li><a href="#" className="hover:text-green-400 transition-colors">Blog</a></li>
+                <li><a href="#" className="hover:text-green-400 transition-colors">Careers</a></li>
+              </ul>
+            </div>
+          </div>
+          
+          <div className="border-t border-slate-700 mt-8 pt-8 text-center text-slate-400 text-sm">
+            © 2024 LeadFlare. Built on Cloudflare Workers with AI.
+          </div>
+        </div>
+      </footer>
+
+    </div>
   );
 }
-
-const resources = [
-  {
-    href: "https://reactrouter.com/docs",
-    text: "React Router Docs",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="20"
-        viewBox="0 0 20 20"
-        fill="none"
-        className="stroke-gray-600 group-hover:stroke-current dark:stroke-gray-300"
-      >
-        <path
-          d="M9.99981 10.0751V9.99992M17.4688 17.4688C15.889 19.0485 11.2645 16.9853 7.13958 12.8604C3.01467 8.73546 0.951405 4.11091 2.53116 2.53116C4.11091 0.951405 8.73546 3.01467 12.8604 7.13958C16.9853 11.2645 19.0485 15.889 17.4688 17.4688ZM2.53132 17.4688C0.951566 15.8891 3.01483 11.2645 7.13974 7.13963C11.2647 3.01471 15.8892 0.951453 17.469 2.53121C19.0487 4.11096 16.9854 8.73551 12.8605 12.8604C8.73562 16.9853 4.11107 19.0486 2.53132 17.4688Z"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-        />
-      </svg>
-    ),
-  },
-  {
-    href: "https://rmx.as/discord",
-    text: "Join Discord",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="20"
-        viewBox="0 0 24 20"
-        fill="none"
-        className="stroke-gray-600 group-hover:stroke-current dark:stroke-gray-300"
-      >
-        <path
-          d="M15.0686 1.25995L14.5477 1.17423L14.2913 1.63578C14.1754 1.84439 14.0545 2.08275 13.9422 2.31963C12.6461 2.16488 11.3406 2.16505 10.0445 2.32014C9.92822 2.08178 9.80478 1.84975 9.67412 1.62413L9.41449 1.17584L8.90333 1.25995C7.33547 1.51794 5.80717 1.99419 4.37748 2.66939L4.19 2.75793L4.07461 2.93019C1.23864 7.16437 0.46302 11.3053 0.838165 15.3924L0.868838 15.7266L1.13844 15.9264C2.81818 17.1714 4.68053 18.1233 6.68582 18.719L7.18892 18.8684L7.50166 18.4469C7.96179 17.8268 8.36504 17.1824 8.709 16.4944L8.71099 16.4904C10.8645 17.0471 13.128 17.0485 15.2821 16.4947C15.6261 17.1826 16.0293 17.8269 16.4892 18.4469L16.805 18.8725L17.3116 18.717C19.3056 18.105 21.1876 17.1751 22.8559 15.9238L23.1224 15.724L23.1528 15.3923C23.5873 10.6524 22.3579 6.53306 19.8947 2.90714L19.7759 2.73227L19.5833 2.64518C18.1437 1.99439 16.6386 1.51826 15.0686 1.25995ZM16.6074 10.7755L16.6074 10.7756C16.5934 11.6409 16.0212 12.1444 15.4783 12.1444C14.9297 12.1444 14.3493 11.6173 14.3493 10.7877C14.3493 9.94885 14.9378 9.41192 15.4783 9.41192C16.0471 9.41192 16.6209 9.93851 16.6074 10.7755ZM8.49373 12.1444C7.94513 12.1444 7.36471 11.6173 7.36471 10.7877C7.36471 9.94885 7.95323 9.41192 8.49373 9.41192C9.06038 9.41192 9.63892 9.93712 9.6417 10.7815C9.62517 11.6239 9.05462 12.1444 8.49373 12.1444Z"
-          strokeWidth="1.5"
-        />
-      </svg>
-    ),
-  },
-];
