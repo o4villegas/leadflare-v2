@@ -1,5 +1,5 @@
 import type { Route } from "./+types/index";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 
 export function meta({}: Route.MetaArgs) {
   return [
