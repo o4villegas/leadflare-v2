@@ -1,0 +1,1515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeadFlare - Campaign Creation</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/3.3.0/tailwind.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background-color: #0f172a;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        
+        .bg-slate-900 { background-color: #0f172a; }
+        .bg-slate-800 { background-color: #1e293b; }
+        .bg-slate-700 { background-color: #334155; }
+        .bg-slate-600 { background-color: #475569; }
+        .border-slate-700 { border-color: #334155; }
+        .border-slate-600 { border-color: #475569; }
+        .text-slate-300 { color: #cbd5e1; }
+        .text-slate-400 { color: #94a3b8; }
+        .text-slate-500 { color: #64748b; }
+        
+        .bg-green-500 { background-color: #22c55e; }
+        .bg-green-600 { background-color: #16a34a; }
+        .text-green-400 { color: #4ade80; }
+        .border-green-500 { border-color: #22c55e; }
+        
+        .text-red-400 { color: #f87171; }
+        .text-yellow-400 { color: #facc15; }
+        .text-orange-400 { color: #fb923c; }
+        
+        .rounded-xl { border-radius: 0.75rem; }
+        .rounded-lg { border-radius: 0.5rem; }
+        .rounded-md { border-radius: 0.375rem; }
+        .rounded { border-radius: 0.25rem; }
+        
+        .p-6 { padding: 1.5rem; }
+        .p-4 { padding: 1rem; }
+        .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+        .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+        .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+        .py-8 { padding-top: 2rem; padding-bottom: 2rem; }
+        .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+        .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+        
+        .mb-8 { margin-bottom: 2rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-3 { margin-bottom: 0.75rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-1 { margin-bottom: 0.25rem; }
+        .mt-4 { margin-top: 1rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mt-1 { margin-top: 0.25rem; }
+        .mr-2 { margin-right: 0.5rem; }
+        
+        .w-full { width: 100%; }
+        .w-20 { width: 5rem; }
+        .w-6 { width: 1.5rem; }
+        .h-24 { height: 6rem; }
+        .h-12 { height: 3rem; }
+        .h-6 { height: 1.5rem; }
+        .h-32 { height: 8rem; }
+        .max-w-7xl { max-width: 80rem; }
+        .min-h-screen { min-height: 100vh; }
+        
+        .flex { display: flex; }
+        .grid { display: grid; }
+        .hidden { display: none; }
+        .block { display: block; }
+        
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .text-center { text-align: center; }
+        
+        .gap-8 { gap: 2rem; }
+        .gap-6 { gap: 1.5rem; }
+        .gap-4 { gap: 1rem; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-1 { gap: 0.25rem; }
+        
+        .space-y-8 > * + * { margin-top: 2rem; }
+        .space-y-6 > * + * { margin-top: 1.5rem; }
+        .space-y-4 > * + * { margin-top: 1rem; }
+        .space-y-3 > * + * { margin-top: 0.75rem; }
+        .space-y-2 > * + * { margin-top: 0.5rem; }
+        
+        .flex-wrap { flex-wrap: wrap; }
+        .flex-1 { flex: 1 1 0%; }
+        
+        .border { border-width: 1px; }
+        .border-2 { border-width: 2px; }
+        .border-t-transparent { border-top-color: transparent; }
+        
+        .text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
+        .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+        .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+        .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+        .text-xs { font-size: 0.75rem; line-height: 1rem; }
+        
+        .font-bold { font-weight: 700; }
+        .font-semibold { font-weight: 600; }
+        .font-medium { font-weight: 500; }
+        
+        .mx-auto { margin-left: auto; margin-right: auto; }
+        
+        .backdrop-blur-sm { backdrop-filter: blur(4px); }
+        
+        .transition-colors { transition-property: color, background-color, border-color; transition-duration: 150ms; }
+        .transition-all { transition: all 150ms; }
+        
+        .focus\:border-green-500:focus { border-color: #22c55e; }
+        .focus\:outline-none:focus { outline: none; }
+        
+        .hover\:bg-green-600:hover { background-color: #16a34a; }
+        .hover\:bg-slate-600:hover { background-color: #475569; }
+        .hover\:text-white:hover { color: #ffffff; }
+        .hover\:text-green-300:hover { color: #86efac; }
+        .hover\:bg-green-500\/10:hover { background-color: rgba(34, 197, 94, 0.1); }
+        .hover\:bg-green-500\/30:hover { background-color: rgba(34, 197, 94, 0.3); }
+        
+        .placeholder-slate-400::placeholder { color: #94a3b8; }
+        
+        input, select, textarea {
+            background-color: #334155;
+            border: 1px solid #475569;
+            border-radius: 0.375rem;
+            color: #ffffff;
+            padding: 0.5rem 0.75rem;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            border-color: #22c55e;
+            outline: none;
+        }
+        
+        button {
+            border-radius: 0.375rem;
+            padding: 0.5rem 1rem;
+            font-weight: 600;
+            transition: all 150ms;
+            cursor: pointer;
+        }
+        
+        .btn-primary {
+            background-color: #22c55e;
+            color: #0f172a;
+        }
+        
+        .btn-primary:hover {
+            background-color: #16a34a;
+        }
+        
+        .btn-secondary {
+            border: 2px solid #22c55e;
+            color: #4ade80;
+            background-color: transparent;
+        }
+        
+        .btn-secondary:hover {
+            background-color: rgba(34, 197, 94, 0.1);
+        }
+        
+        .tag {
+            background-color: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .tag button {
+            background: none;
+            border: none;
+            color: #4ade80;
+            padding: 0;
+            margin: 0;
+            cursor: pointer;
+        }
+        
+        /* Field strength indicators */
+        .field-strength {
+            height: 2px;
+            border-radius: 1px;
+            margin-top: 2px;
+            transition: all 200ms;
+        }
+        
+        .strength-weak { background-color: #ef4444; width: 33%; }
+        .strength-good { background-color: #f59e0b; width: 66%; }
+        .strength-excellent { background-color: #22c55e; width: 100%; }
+        
+        /* Tooltip styles */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #1e293b;
+            color: #cbd5e1;
+            text-align: left;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            border: 1px solid #334155;
+            font-size: 0.75rem;
+            line-height: 1.2;
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        /* Template card styles */
+        .template-card {
+            border: 2px solid #334155;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 200ms;
+            background: #1e293b;
+        }
+        
+        .template-card:hover {
+            border-color: #22c55e;
+            background: rgba(34, 197, 94, 0.05);
+        }
+        
+        .template-card.selected {
+            border-color: #22c55e;
+            background: rgba(34, 197, 94, 0.1);
+        }
+        
+        /* Audience estimator styles */
+        .audience-indicator {
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+        
+        .audience-narrow {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+        
+        .audience-optimal {
+            background-color: rgba(34, 197, 94, 0.1);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+        
+        .audience-broad {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        /* Grid layouts */
+        .grid-cols-2 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        
+        .grid-cols-3 {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        
+        @media (min-width: 768px) {
+            .md\:grid-cols-2 {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .md\:grid-cols-3 {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .lg\:grid-cols-3 {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+            .lg\:col-span-2 {
+                grid-column: span 2 / span 2;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-white min-h-screen">
+
+    <!-- Navigation -->
+    <nav style="border-bottom: 1px solid #334155; background-color: rgba(15, 23, 42, 0.8); backdrop-filter: blur(4px); padding: 0 1.5rem;">
+        <div style="max-width: 80rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 6rem;">
+            <div style="display: flex; align-items: center;">
+                <div style="width: 5rem; height: 3rem; background: linear-gradient(to bottom right, #4ade80, #22c55e); border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #0f172a; font-size: 1.125rem;">
+                    LOGO
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <button style="color: #94a3b8; padding: 0.5rem 0.75rem; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 500; transition: color 150ms; background: none; border: none; cursor: pointer;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='#94a3b8'">
+                    Save Draft
+                </button>
+                <button onclick="saveCampaign()" class="btn-primary" style="background-color: #22c55e; color: #0f172a; padding: 0.5rem 1.5rem; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 600; transition: background-color 150ms; border: none; cursor: pointer;" onmouseover="this.style.backgroundColor='#16a34a'" onmouseout="this.style.backgroundColor='#22c55e'">
+                    Back
+                </button>
+            </div>
+        </div>
+    </nav>
+
+
+
+    <div style="max-width: 80rem; margin: 0 auto; padding: 2rem 1.5rem;">
+        
+        <!-- Page Header -->
+        <div style="margin-bottom: 2rem;">
+            <h1 style="font-size: 2.25rem; line-height: 2.5rem; font-weight: 700; margin-bottom: 0.5rem;">Create New Campaign</h1>
+            <p style="color: #cbd5e1;">Configure your Meta lead generation campaign with intelligent targeting and optimization</p>
+        </div>
+
+        <!-- Quick Start Templates -->
+        <div id="templatesSection" style="background-color: #1e293b; border-radius: 0.75rem; border: 1px solid #334155; padding: 1.5rem; margin-bottom: 2rem;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                <h2 style="font-size: 1.25rem; line-height: 1.75rem; font-weight: 600;">Quick Start Templates</h2>
+                <button onclick="toggleTemplates()" id="toggleTemplatesBtn" style="font-size: 0.875rem; color: #4ade80; background: none; border: none; cursor: pointer;">Hide Templates</button>
+            </div>
+            
+            <div id="templateCards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+                <div class="template-card" onclick="applyTemplate('saas')">
+                    <h3 style="font-weight: 600; margin-bottom: 0.5rem; color: #ffffff;">SaaS Lead Generation</h3>
+                    <p style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.75rem;">Target business professionals interested in software solutions</p>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.25rem;">
+                        <span style="background-color: #334155; color: #cbd5e1; padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-size: 0.625rem;">Technology</span>
+                        <span style="background-color: #334155; color: #cbd5e1; padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-size: 0.625rem;">$75/day</span>
+                        <span style="background-color: #334155; color: #cbd5e1; padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-size: 0.625rem;">Business Tools</span>
+                    </div>
+                </div>
+                
+                <div class="template-card" onclick="applyTemplate('realestate')">
+                    <h3 style="font-weight: 600; margin-bottom: 0.5rem; color: #ffffff;">Real Estate Leads</h3>
+                    <p style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.75rem;">Attract potential home buyers and sellers in your area</p>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.25rem;">
+                        <span style="background-color: #334155; color: #cbd5e1; padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-size: 0.625rem;">Real Estate</span>
+                        <span style="background-color: #334155; color: #cbd5e1; padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-size: 0.625rem;">$50/day</span>
+                        <span style="background-color: #334155; color: #cbd5e1; padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-size: 0.625rem;">Local Targeting</span>
+                    </div>
+                </div>
+                
+                <div class="template-card" onclick="applyTemplate('healthcare')">
+                    <h3 style="font-weight: 600; margin-bottom: 0.5rem; color: #ffffff;">Healthcare Services</h3>
+                    <p style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.75rem;">Connect with patients seeking medical and wellness services</p>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.25rem;">
+                        <span style="background-color: #334155; color: #cbd5e1; padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-size: 0.625rem;">Healthcare</span>
+                        <span style="background-color: #334155; color: #cbd5e1; padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-size: 0.625rem;">$60/day</span>
+                        <span style="background-color: #334155; color: #cbd5e1; padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-size: 0.625rem;">Health & Wellness</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+            
+            <!-- Main Form -->
+            <div style="display: flex; flex-direction: column; gap: 2rem;">
+
+                <!-- Campaign Basics -->
+                <div style="background-color: #1e293b; border-radius: 0.75rem; border: 1px solid #334155; padding: 2rem;">
+                    <h2 style="font-size: 1.25rem; line-height: 1.75rem; font-weight: 600; margin-bottom: 1.5rem;">Campaign Basics</h2>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+                        <div style="padding: 0 1rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                <label style="font-size: 0.875rem; font-weight: 500;">Campaign Name</label>
+                                <div class="tooltip">
+                                    <span style="color: #94a3b8; cursor: help;">ⓘ</span>
+                                    <span class="tooltiptext">Choose a descriptive name that helps you identify this campaign later. Include your target audience or goal.</span>
+                                </div>
+                            </div>
+                            <input
+                                type="text"
+                                id="campaignName"
+                                onchange="updateField('name', this.value)"
+                                oninput="updateCharacterCount('campaignName', 'nameCount', 60); validateField('campaignName')"
+                                style="width: 100%; padding: 0.75rem; background-color: #334155; border: 1px solid #475569; border-radius: 0.375rem; color: #ffffff; font-size: 0.875rem;"
+                                placeholder="Enter campaign name"
+                                maxlength="60"
+                                onfocus="this.style.borderColor='#22c55e'" onblur="this.style.borderColor='#475569'"
+                            />
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+                                <div class="field-strength" id="nameStrength"></div>
+                                <span id="nameCount" style="font-size: 0.75rem; color: #94a3b8;">0/60</span>
+                            </div>
+                            <p id="nameError" style="color: #f87171; font-size: 0.875rem; margin-top: 0.5rem; display: none;">Campaign name is required</p>
+                        </div>
+
+                        <div style="padding: 0 1rem;">
+                            <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.75rem;">Business Type</label>
+                            <select
+                                id="businessType"
+                                onchange="updateField('businessType', this.value); autoPopulateForBusiness(this.value)"
+                                style="width: 100%; padding: 0.75rem; background-color: #334155; border: 1px solid #475569; border-radius: 0.375rem; color: #ffffff; font-size: 0.875rem;"
+                                onfocus="this.style.borderColor='#22c55e'" onblur="this.style.borderColor='#475569'"
+                            >
+                                <option value="">Select business type</option>
+                                <option value="Technology">Technology</option>
+                                <option value="Healthcare">Healthcare</option>
+                                <option value="Finance">Finance</option>
+                                <option value="Education">Education</option>
+                                <option value="Real Estate">Real Estate</option>
+                                <option value="Retail">Retail</option>
+                                <option value="Professional Services">Professional Services</option>
+                                <option value="Food & Beverage">Food & Beverage</option>
+                                <option value="Fitness & Wellness">Fitness & Wellness</option>
+                                <option value="Legal Services">Legal Services</option>
+                            </select>
+                            <p id="businessTypeError" style="color: #f87171; font-size: 0.875rem; margin-top: 0.5rem; display: none;">Business type is required</p>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1.5rem; padding: 0 1rem;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+                            <label style="font-size: 0.875rem; font-weight: 500;">Campaign Description</label>
+                            <div class="tooltip">
+                                <span style="color: #94a3b8; cursor: help;">ⓘ</span>
+                                <span class="tooltiptext">Describe your campaign goals, target outcome, and what makes your offer unique. This helps optimize your targeting.</span>
+                            </div>
+                        </div>
+                        <textarea
+                            id="description"
+                            onchange="updateField('description', this.value)"
+                            oninput="updateCharacterCount('description', 'descCount', 300); validateField('description')"
+                            rows="3"
+                            style="width: 100%; padding: 0.75rem; background-color: #334155; border: 1px solid #475569; border-radius: 0.375rem; color: #ffffff; font-size: 0.875rem; resize: vertical;"
+                            placeholder="Describe your campaign goals and target outcome..."
+                            maxlength="300"
+                            onfocus="this.style.borderColor='#22c55e'" onblur="this.style.borderColor='#475569'"
+                        ></textarea>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+                            <div class="field-strength" id="descStrength"></div>
+                            <span id="descCount" style="font-size: 0.75rem; color: #94a3b8;">0/300</span>
+                        </div>
+                        <p id="descriptionError" style="color: #f87171; font-size: 0.875rem; margin-top: 0.5rem; display: none;">Campaign description is required</p>
+                    </div>
+                </div>
+
+                <!-- Budget & Schedule -->
+                <div style="background-color: #1e293b; border-radius: 0.75rem; border: 1px solid #334155; padding: 1.5rem;">
+                    <h2 style="font-size: 1.25rem; line-height: 1.75rem; font-weight: 600; margin-bottom: 1rem;">Budget & Schedule</h2>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                        <div>
+                            <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">Budget Type</label>
+                            <div style="display: flex; gap: 1rem;">
+                                <label style="display: flex; align-items: center; color: #ffffff;">
+                                    <input type="radio" name="budgetType" value="daily" checked onchange="updateField('budgetType', this.value)" style="margin-right: 0.5rem; accent-color: #22c55e;" />
+                                    Daily
+                                </label>
+                                <label style="display: flex; align-items: center; color: #ffffff;">
+                                    <input type="radio" name="budgetType" value="lifetime" onchange="updateField('budgetType', this.value)" style="margin-right: 0.5rem; accent-color: #22c55e;" />
+                                    Lifetime
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                <label style="font-size: 0.875rem; font-weight: 500;">Budget Amount $(<span id="budgetLabel">per day</span>)</label>
+                                <div class="tooltip">
+                                    <span style="color: #94a3b8; cursor: help;">ⓘ</span>
+                                    <span class="tooltiptext">Higher budgets typically lead to faster results and broader reach. Start with $50-100/day for optimal performance.</span>
+                                </div>
+                            </div>
+                            <input
+                                type="number"
+                                id="budget"
+                                value="50"
+                                onchange="updateField('budget', this.value); updateBudgetRecommendation()"
+                                oninput="updateBudgetRecommendation()"
+                                min="5"
+                                style="width: 100%; padding: 0.5rem 0.75rem; background-color: #334155; border: 1px solid #475569; border-radius: 0.375rem; color: #ffffff; font-size: 0.875rem;"
+                                onfocus="this.style.borderColor='#22c55e'" onblur="this.style.borderColor='#475569'"
+                            />
+                            <div id="budgetRecommendation" style="font-size: 0.75rem; margin-top: 0.25rem;"></div>
+                            <p id="budgetError" style="color: #f87171; font-size: 0.875rem; margin-top: 0.25rem; display: none;">Minimum budget is $5</p>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 1rem;">
+                        <div>
+                            <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">Start Date</label>
+                            <input
+                                type="date"
+                                id="startDate"
+                                onchange="updateField('startDate', this.value)"
+                                style="width: 100%; padding: 0.5rem 0.75rem; background-color: #334155; border: 1px solid #475569; border-radius: 0.375rem; color: #ffffff; font-size: 0.875rem;"
+                                onfocus="this.style.borderColor='#22c55e'" onblur="this.style.borderColor='#475569'"
+                            />
+                        </div>
+
+                        <div>
+                            <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">End Date (Optional)</label>
+                            <input
+                                type="date"
+                                id="endDate"
+                                onchange="updateField('endDate', this.value)"
+                                style="width: 100%; padding: 0.5rem 0.75rem; background-color: #334155; border: 1px solid #475569; border-radius: 0.375rem; color: #ffffff; font-size: 0.875rem;"
+                                onfocus="this.style.borderColor='#22c55e'" onblur="this.style.borderColor='#475569'"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Audience Targeting -->
+                <div style="background-color: #1e293b; border-radius: 0.75rem; border: 1px solid #334155; padding: 2rem;">
+                    <h2 style="font-size: 1.25rem; line-height: 1.75rem; font-weight: 600; margin-bottom: 1.5rem;">Audience Targeting</h2>
+                    
+                    <!-- Demographics -->
+                    <div style="margin-bottom: 2rem; padding: 0 1rem;">
+                        <h3 style="font-size: 1.125rem; line-height: 1.75rem; font-weight: 500; margin-bottom: 1rem;">Demographics</h3>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
+                            <div style="padding: 0 0.5rem;">
+                                <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.75rem;">Age Range</label>
+                                <div style="display: flex; gap: 0.75rem; align-items: center;">
+                                    <input
+                                        type="number"
+                                        id="ageMin"
+                                        value="18"
+                                        min="13"
+                                        max="65"
+                                        onchange="updateField('ageMin', this.value); updateAudienceEstimate()"
+                                        style="width: 100%; padding: 0.75rem; background-color: #334155; border: 1px solid #475569; border-radius: 0.375rem; color: #ffffff; font-size: 0.875rem; margin-right: 0.25rem;"
+                                        onfocus="this.style.borderColor='#22c55e'" onblur="this.style.borderColor='#475569'"
+                                    />
+                                    <span style="color: #94a3b8; white-space: nowrap; margin: 0 0.25rem;">to</span>
+                                    <input
+                                        type="number"
+                                        id="ageMax"
+                                        value="65"
+                                        min="13"
+                                        max="65"
+                                        onchange="updateField('ageMax', this.value); updateAudienceEstimate()"
+                                        style="width: 100%; padding: 0.75rem; background-color: #334155; border: 1px solid #475569; border-radius: 0.375rem; color: #ffffff; font-size: 0.875rem; margin-left: 0.25rem;"
+                                        onfocus="this.style.borderColor='#22c55e'" onblur="this.style.borderColor='#475569'"
+                                    />
+                                </div>
+                            </div>
+
+                            <div style="padding: 0 0.5rem;">
+                                <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.75rem;">Gender</label>
+                                <select
+                                    id="gender"
+                                    onchange="updateField('gender', this.value); updateAudienceEstimate()"
+                                    style="width: 100%; padding: 0.75rem; background-color: #334155; border: 1px solid #475569; border-radius: 0.375rem; color: #ffffff; font-size: 0.875rem;"
+                                    onfocus="this.style.borderColor='#22c55e'" onblur="this.style.borderColor='#475569'"
+                                >
+                                    <option value="all" selected>All</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                </select>
+                            </div>
+
+                            <div style="padding: 0 0.5rem;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                    <label style="font-size: 0.875rem; font-weight: 500;">Locations</label>
+                                    <div class="tooltip">
+                                        <span style="color: #94a3b8; cursor: help;">ⓘ</span>
+                                        <span class="tooltiptext">Add cities, states, or countries. More specific targeting usually performs better than broad geographic areas.</span>
+                                    </div>
+                                </div>
+                                <input
+                                    type="text"
+                                    id="locationInput"
+                                    placeholder="Add location (press Enter)"
+                                    onkeypress="if(event.key==='Enter' && this.value) { addLocation(this.value); this.value=''; }"
+                                    style="width: 100%; padding: 0.75rem; background-color: #334155; border: 1px solid #475569; border-radius: 0.375rem; color: #ffffff; font-size: 0.875rem;"
+                                    onfocus="this.style.borderColor='#22c55e'" onblur="this.style.borderColor='#475569'"
+                                />
+                                <p id="locationsError" style="color: #f87171; font-size: 0.875rem; margin-top: 0.5rem; display: none;">At least one location is required</p>
+                                <div id="locationTags" style="display: flex; flex-wrap: wrap; gap: 0.25rem; margin-top: 0.75rem; padding-right: 0.5rem;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interests -->
+                    <div style="margin-bottom: 2rem; padding: 0 1rem;">
+                        <h3 style="font-size: 1.125rem; line-height: 1.75rem; font-weight: 500; margin-bottom: 1rem;">Interests</h3>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+                            <div style="padding: 0 0.5rem;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                    <label style="font-size: 0.875rem; font-weight: 500;">Add Interest</label>
+                                    <div class="tooltip">
+                                        <span style="color: #94a3b8; cursor: help;">ⓘ</span>
+                                        <span class="tooltiptext">Target people based on their interests and activities. 3-5 relevant interests typically work best.</span>
+                                    </div>
+                                </div>
+                                <input
+                                    type="text"
+                                    id="interestInput"
+                                    placeholder="Type interest (press Enter)"
+                                    onkeypress="if(event.key==='Enter' && this.value) { addInterest(this.value); this.value=''; }"
+                                    style="width: 100%; padding: 0.75rem; background-color: #334155; border: 1px solid #475569; border-radius: 0.375rem; color: #ffffff; font-size: 0.875rem;"
+                                    onfocus="this.style.borderColor='#22c55e'" onblur="this.style.borderColor='#475569'"
+                                />
+                            </div>
+                            <div style="padding: 0 0.5rem;">
+                                <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.75rem;">Quick Add</label>
+                                <div id="suggestedInterests" style="display: flex; flex-wrap: wrap; gap: 0.5rem; padding-right: 0.5rem;">
+                                    <button onclick="addInterest('Technology')" style="background-color: #334155; color: #ffffff; font-size: 0.75rem; padding: 0.5rem 0.75rem; border-radius: 0.25rem; border: none; cursor: pointer; transition: background-color 150ms;" onmouseover="this.style.backgroundColor='#475569'" onmouseout="this.style.backgroundColor='#334155'">+ Technology</button>
+                                    <button onclick="addInterest('Small Business')" style="background-color: #334155; color: #ffffff; font-size: 0.75rem; padding: 0.5rem 0.75rem; border-radius: 0.25rem; border: none; cursor: pointer; transition: background-color 150ms;" onmouseover="this.style.backgroundColor='#475569'" onmouseout="this.style.backgroundColor='#334155'">+ Small Business</button>
+                                    <button onclick="addInterest('Marketing')" style="background-color: #334155; color: #ffffff; font-size: 0.75rem; padding: 0.5rem 0.75rem; border-radius: 0.25rem; border: none; cursor: pointer; transition: background-color 150ms;" onmouseover="this.style.backgroundColor='#475569'" onmouseout="this.style.backgroundColor='#334155'">+ Marketing</button>
+                                    <button onclick="addInterest('Finance')" style="background-color: #334155; color: #ffffff; font-size: 0.75rem; padding: 0.5rem 0.75rem; border-radius: 0.25rem; border: none; cursor: pointer; transition: background-color 150ms;" onmouseover="this.style.backgroundColor='#475569'" onmouseout="this.style.backgroundColor='#334155'">+ Finance</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="interestTags" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; padding: 0 1rem;"></div>
+                        <div id="interestRecommendation" style="font-size: 0.75rem; margin-top: 0.75rem; padding: 0 1rem;"></div>
+                    </div>
+
+                    <!-- Behaviors -->
+                    <div style="margin-bottom: 2rem; padding: 0 1rem;">
+                        <h3 style="font-size: 1.125rem; line-height: 1.75rem; font-weight: 500; margin-bottom: 1rem;">Behaviors</h3>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; padding: 0 0.5rem;">
+                            <label style="display: flex; align-items: center; color: #ffffff; padding: 0.5rem 0;">
+                                <input type="checkbox" onchange="updateBehavior('Small business owners', this.checked)" style="margin-right: 0.75rem; accent-color: #22c55e;" />
+                                <span style="font-size: 0.875rem;">Small business owners</span>
+                            </label>
+                            <label style="display: flex; align-items: center; color: #ffffff; padding: 0.5rem 0;">
+                                <input type="checkbox" onchange="updateBehavior('Frequent travelers', this.checked)" style="margin-right: 0.75rem; accent-color: #22c55e;" />
+                                <span style="font-size: 0.875rem;">Frequent travelers</span>
+                            </label>
+                            <label style="display: flex; align-items: center; color: #ffffff; padding: 0.5rem 0;">
+                                <input type="checkbox" onchange="updateBehavior('Online shoppers', this.checked)" style="margin-right: 0.75rem; accent-color: #22c55e;" />
+                                <span style="font-size: 0.875rem;">Online shoppers</span>
+                            </label>
+                            <label style="display: flex; align-items: center; color: #ffffff; padding: 0.5rem 0;">
+                                <input type="checkbox" onchange="updateBehavior('Technology early adopters', this.checked)" style="margin-right: 0.75rem; accent-color: #22c55e;" />
+                                <span style="font-size: 0.875rem;">Technology early adopters</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Placements & Optimization -->
+                <div style="background-color: #1e293b; border-radius: 0.75rem; border: 1px solid #334155; padding: 2rem;">
+                    <h2 style="font-size: 1.25rem; line-height: 1.75rem; font-weight: 600; margin-bottom: 1.5rem;">Placements & Optimization</h2>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+                        <div style="padding: 0 1rem;">
+                            <h3 style="font-size: 1.125rem; line-height: 1.75rem; font-weight: 500; margin-bottom: 1rem;">Ad Placements</h3>
+                            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                                <label style="display: flex; align-items: center; color: #ffffff; padding: 0.25rem 0;">
+                                    <input type="checkbox" checked onchange="updatePlacement('facebook_feeds', this.checked)" style="margin-right: 0.75rem; accent-color: #22c55e;" />
+                                    <span style="font-size: 0.875rem;">Facebook Feeds</span>
+                                </label>
+                                <label style="display: flex; align-items: center; color: #ffffff; padding: 0.25rem 0;">
+                                    <input type="checkbox" checked onchange="updatePlacement('instagram_feeds', this.checked)" style="margin-right: 0.75rem; accent-color: #22c55e;" />
+                                    <span style="font-size: 0.875rem;">Instagram Feeds</span>
+                                </label>
+                                <label style="display: flex; align-items: center; color: #ffffff; padding: 0.25rem 0;">
+                                    <input type="checkbox" onchange="updatePlacement('facebook_marketplace', this.checked)" style="margin-right: 0.75rem; accent-color: #22c55e;" />
+                                    <span style="font-size: 0.875rem;">Facebook Marketplace</span>
+                                </label>
+                                <label style="display: flex; align-items: center; color: #ffffff; padding: 0.25rem 0;">
+                                    <input type="checkbox" onchange="updatePlacement('instagram_stories', this.checked)" style="margin-right: 0.75rem; accent-color: #22c55e;" />
+                                    <span style="font-size: 0.875rem;">Instagram Stories</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div style="padding: 0 1rem;">
+                            <div style="margin-bottom: 1.5rem;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                    <label style="font-size: 0.875rem; font-weight: 500;">Bid Strategy</label>
+                                    <div class="tooltip">
+                                        <span style="color: #94a3b8; cursor: help;">ⓘ</span>
+                                        <span class="tooltiptext">Lowest Cost typically works best for lead generation campaigns. Use Bid Cap if you have a specific cost per lead target.</span>
+                                    </div>
+                                </div>
+                                <select
+                                    id="bidStrategy"
+                                    onchange="updateField('bidStrategy', this.value)"
+                                    style="width: 100%; padding: 0.75rem; background-color: #334155; border: 1px solid #475569; border-radius: 0.375rem; color: #ffffff; font-size: 0.875rem;"
+                                    onfocus="this.style.borderColor='#22c55e'" onblur="this.style.borderColor='#475569'"
+                                >
+                                    <option value="LOWEST_COST_WITHOUT_CAP" selected>Lowest Cost</option>
+                                    <option value="LOWEST_COST_WITH_BID_CAP">Bid Cap</option>
+                                    <option value="TARGET_COST">Target Cost</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.75rem;">Optimization Goal</label>
+                                <select
+                                    id="optimizationGoal"
+                                    onchange="updateField('optimizationGoal', this.value)"
+                                    style="width: 100%; padding: 0.75rem; background-color: #334155; border: 1px solid #475569; border-radius: 0.375rem; color: #ffffff; font-size: 0.875rem;"
+                                    onfocus="this.style.borderColor='#22c55e'" onblur="this.style.borderColor='#475569'"
+                                >
+                                    <option value="LEAD_GENERATION" selected>Lead Generation</option>
+                                    <option value="CONVERSIONS">Conversions</option>
+                                    <option value="LINK_CLICKS">Link Clicks</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lead Form Configuration -->
+                <div style="background-color: #1e293b; border-radius: 0.75rem; border: 1px solid #334155; padding: 2rem;">
+                    <h2 style="font-size: 1.25rem; line-height: 1.75rem; font-weight: 600; margin-bottom: 1.5rem;">Lead Form Configuration</h2>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem;">
+                        <div style="padding: 0 1rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                                <label style="font-size: 0.875rem; font-weight: 500;">Form Fields</label>
+                                <div class="tooltip">
+                                    <span style="color: #94a3b8; cursor: help;">ⓘ</span>
+                                    <span class="tooltiptext">Fewer fields typically increase conversion rates, but more fields provide better lead quality. Email is always required.</span>
+                                </div>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                                <label style="display: flex; align-items: center; color: #ffffff; padding: 0.25rem 0;">
+                                    <input type="checkbox" checked disabled style="margin-right: 0.75rem; accent-color: #22c55e;" />
+                                    <span style="font-size: 0.875rem;">Email (Required)</span>
+                                </label>
+                                <label style="display: flex; align-items: center; color: #ffffff; padding: 0.25rem 0;">
+                                    <input type="checkbox" checked onchange="updateFormField('full_name', this.checked)" style="margin-right: 0.75rem; accent-color: #22c55e;" />
+                                    <span style="font-size: 0.875rem;">Full Name</span>
+                                </label>
+                                <label style="display: flex; align-items: center; color: #ffffff; padding: 0.25rem 0;">
+                                    <input type="checkbox" checked onchange="updateFormField('phone_number', this.checked)" style="margin-right: 0.75rem; accent-color: #22c55e;" />
+                                    <span style="font-size: 0.875rem;">Phone Number</span>
+                                </label>
+                                <label style="display: flex; align-items: center; color: #ffffff; padding: 0.25rem 0;">
+                                    <input type="checkbox" onchange="updateFormField('company_name', this.checked)" style="margin-right: 0.75rem; accent-color: #22c55e;" />
+                                    <span style="font-size: 0.875rem;">Company Name</span>
+                                </label>
+                                <label style="display: flex; align-items: center; color: #ffffff; padding: 0.25rem 0;">
+                                    <input type="checkbox" onchange="updateFormField('message', this.checked)" style="margin-right: 0.75rem; accent-color: #22c55e;" />
+                                    <span style="font-size: 0.875rem;">Message</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div style="padding: 0 1rem;">
+                            <div style="margin-bottom: 1.5rem;">
+                                <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.75rem;">Privacy Policy URL</label>
+                                <input
+                                    type="url"
+                                    id="privacyUrl"
+                                    onchange="updateField('privacyPolicyUrl', this.value)"
+                                    style="width: 100%; padding: 0.75rem; background-color: #334155; border: 1px solid #475569; border-radius: 0.375rem; color: #ffffff; font-size: 0.875rem;"
+                                    placeholder="https://yoursite.com/privacy"
+                                    onfocus="this.style.borderColor='#22c55e'" onblur="this.style.borderColor='#475569'"
+                                />
+                                <p id="privacyUrlError" style="color: #f87171; font-size: 0.875rem; margin-top: 0.5rem; display: none;">Privacy policy URL is required</p>
+                            </div>
+
+                            <div>
+                                <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.75rem;">Thank You Message</label>
+                                <textarea
+                                    id="thankYouMessage"
+                                    onchange="updateField('thankYouMessage', this.value)"
+                                    oninput="updateCharacterCount('thankYouMessage', 'thankYouCount', 150)"
+                                    rows="3"
+                                    style="width: 100%; padding: 0.75rem; background-color: #334155; border: 1px solid #475569; border-radius: 0.375rem; color: #ffffff; font-size: 0.875rem; resize: vertical;"
+                                    maxlength="150"
+                                    onfocus="this.style.borderColor='#22c55e'" onblur="this.style.borderColor='#475569'"
+                                >Thank you for your interest! We'll be in touch soon.</textarea>
+                                <div style="display: flex; justify-content: flex-end; margin-top: 0.5rem;">
+                                    <span id="thankYouCount" style="font-size: 0.75rem; color: #94a3b8;">58/150</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                
+                <!-- Audience Estimator -->
+                <div style="background-color: #1e293b; border-radius: 0.75rem; border: 1px solid #334155; padding: 1.5rem;">
+                    <h3 style="font-size: 1.125rem; line-height: 1.75rem; font-weight: 600; margin-bottom: 1rem;">Audience Insights</h3>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <div style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.25rem;">Estimated Audience Size</div>
+                        <div id="audienceSize" style="font-size: 1.5rem; font-weight: 600; color: #4ade80;">2.3M people</div>
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <div style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.25rem;">Potential Weekly Reach</div>
+                        <div id="weeklyReach" style="font-size: 1rem; font-weight: 500; color: #cbd5e1;">450K - 780K</div>
+                    </div>
+                    
+                    <div id="audienceIndicator" class="audience-indicator audience-optimal">
+                        ✓ Optimal audience size for lead generation
+                    </div>
+                </div>
+                
+                <!-- Campaign Summary -->
+                <div style="background-color: #1e293b; border-radius: 0.75rem; border: 1px solid #334155; padding: 1.5rem;">
+                    <h3 style="font-size: 1.125rem; line-height: 1.75rem; font-weight: 600; margin-bottom: 1rem;">Campaign Summary</h3>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="font-size: 0.875rem; color: #94a3b8;">Business Type:</span>
+                            <span id="summaryBusinessType" style="font-size: 0.875rem; color: #cbd5e1;">Not selected</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="font-size: 0.875rem; color: #94a3b8;">Daily Budget:</span>
+                            <span id="summaryBudget" style="font-size: 0.875rem; color: #cbd5e1;">$50</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="font-size: 0.875rem; color: #94a3b8;">Locations:</span>
+                            <span id="summaryLocations" style="font-size: 0.875rem; color: #cbd5e1;">0 selected</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="font-size: 0.875rem; color: #94a3b8;">Interests:</span>
+                            <span id="summaryInterests" style="font-size: 0.875rem; color: #cbd5e1;">0 selected</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="font-size: 0.875rem; color: #94a3b8;">Form Fields:</span>
+                            <span id="summaryFormFields" style="font-size: 0.875rem; color: #cbd5e1;">3 fields</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Optimization Tips -->
+                <div style="background-color: #1e293b; border-radius: 0.75rem; border: 1px solid #334155; padding: 1.5rem;">
+                    <h3 style="font-size: 1.125rem; line-height: 1.75rem; font-weight: 600; margin-bottom: 1rem;">Optimization Tips</h3>
+                    <div id="optimizationTips" style="font-size: 0.875rem; color: #94a3b8; line-height: 1.4;">
+                        Complete your campaign details to see personalized optimization recommendations.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Proceed to Creative Button -->
+        <div style="margin-top: 3rem; text-align: center;">
+            <button
+                onclick="proceedToCreative()"
+                id="proceedBtn"
+                style="background-color: #22c55e; color: #0f172a; font-weight: 600; padding: 1rem 3rem; border-radius: 0.5rem; border: none; cursor: pointer; font-size: 1.125rem; transition: all 150ms; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+                onmouseover="this.style.backgroundColor='#16a34a'; this.style.transform='translateY(-1px)'" 
+                onmouseout="this.style.backgroundColor='#22c55e'; this.style.transform='translateY(0)'"
+                disabled
+            >
+                Proceed to Creative Generation →
+            </button>
+            <p style="margin-top: 0.5rem; font-size: 0.875rem; color: #64748b;">Complete all required fields to continue</p>
+        </div>
+    </div>
+
+    <script>
+        // Campaign data object
+        let campaignData = {
+            name: '',
+            businessType: '',
+            description: '',
+            budgetType: 'daily',
+            budget: 50,
+            startDate: '',
+            endDate: '',
+            ageMin: 18,
+            ageMax: 65,
+            gender: 'all',
+            locations: [],
+            interests: [],
+            behaviors: [],
+            placements: ['facebook_feeds', 'instagram_feeds'],
+            bidStrategy: 'LOWEST_COST_WITHOUT_CAP',
+            optimizationGoal: 'LEAD_GENERATION',
+            formFields: ['email', 'full_name', 'phone_number'],
+            privacyPolicyUrl: '',
+            thankYouMessage: "Thank you for your interest! We'll be in touch soon."
+        };
+
+        // Business type suggestions
+        const businessSuggestions = {
+            'Technology': {
+                interests: ['Technology', 'Software', 'Cloud Computing', 'Artificial Intelligence', 'Digital Marketing'],
+                budget: 75,
+                locations: ['United States', 'San Francisco', 'Seattle', 'Austin', 'New York'],
+                behaviors: ['Technology early adopters', 'Small business owners']
+            },
+            'Healthcare': {
+                interests: ['Health and wellness', 'Healthcare', 'Medical services', 'Fitness', 'Nutrition'],
+                budget: 60,
+                locations: ['United States'],
+                behaviors: ['Healthcare services']
+            },
+            'Real Estate': {
+                interests: ['Real estate', 'Home buying', 'Investment', 'Property management'],
+                budget: 50,
+                locations: ['Local area'],
+                behaviors: ['Home buyers', 'Real estate investors']
+            },
+            'Finance': {
+                interests: ['Finance', 'Investment', 'Banking', 'Insurance', 'Financial planning'],
+                budget: 80,
+                locations: ['United States'],
+                behaviors: ['Small business owners', 'Frequent travelers']
+            },
+            'Education': {
+                interests: ['Education', 'Online learning', 'Professional development', 'Skill building'],
+                budget: 45,
+                locations: ['United States'],
+                behaviors: ['Online learners']
+            }
+        };
+
+        // Template data
+        const templates = {
+            'saas': {
+                name: 'SaaS Lead Generation Campaign',
+                businessType: 'Technology',
+                description: 'Generate high-quality leads for our software solution targeting business professionals and decision makers.',
+                budget: 75,
+                budgetType: 'daily',
+                ageMin: 25,
+                ageMax: 55,
+                gender: 'all',
+                locations: ['United States', 'Canada'],
+                interests: ['Technology', 'Software', 'Business tools', 'Productivity', 'Cloud computing'],
+                behaviors: ['Small business owners', 'Technology early adopters'],
+                placements: ['facebook_feeds', 'instagram_feeds'],
+                bidStrategy: 'LOWEST_COST_WITHOUT_CAP',
+                optimizationGoal: 'LEAD_GENERATION',
+                formFields: ['email', 'full_name', 'company_name'],
+                thankYouMessage: 'Thank you for your interest in our software solution! Our team will contact you within 24 hours.'
+            },
+            'realestate': {
+                name: 'Real Estate Lead Generation',
+                businessType: 'Real Estate',
+                description: 'Connect with potential home buyers and sellers in our local market area.',
+                budget: 50,
+                budgetType: 'daily',
+                ageMin: 25,
+                ageMax: 65,
+                gender: 'all',
+                locations: ['Local area'],
+                interests: ['Real estate', 'Home buying', 'Property investment', 'Moving'],
+                behaviors: ['Frequent travelers'],
+                placements: ['facebook_feeds', 'instagram_feeds', 'facebook_marketplace'],
+                bidStrategy: 'LOWEST_COST_WITHOUT_CAP',
+                optimizationGoal: 'LEAD_GENERATION',
+                formFields: ['email', 'full_name', 'phone_number'],
+                thankYouMessage: 'Thank you for your interest! A local real estate expert will contact you soon.'
+            },
+            'healthcare': {
+                name: 'Healthcare Services Campaign',
+                businessType: 'Healthcare',
+                description: 'Attract patients seeking quality healthcare and wellness services in our area.',
+                budget: 60,
+                budgetType: 'daily',
+                ageMin: 25,
+                ageMax: 65,
+                gender: 'all',
+                locations: ['Local area'],
+                interests: ['Health and wellness', 'Healthcare', 'Medical services', 'Fitness'],
+                behaviors: [],
+                placements: ['facebook_feeds', 'instagram_feeds'],
+                bidStrategy: 'LOWEST_COST_WITHOUT_CAP',
+                optimizationGoal: 'LEAD_GENERATION',
+                formFields: ['email', 'full_name', 'phone_number'],
+                thankYouMessage: 'Thank you for choosing our healthcare services! We will contact you to schedule your appointment.'
+            }
+        };
+
+        // Apply template
+        function applyTemplate(templateKey) {
+            const template = templates[templateKey];
+            if (!template) return;
+
+            // Apply all template data
+            Object.keys(template).forEach(key => {
+                if (key === 'locations') {
+                    campaignData.locations = [...template.locations];
+                    updateLocationTags();
+                } else if (key === 'interests') {
+                    campaignData.interests = [...template.interests];
+                    updateInterestTags();
+                } else if (key === 'behaviors') {
+                    campaignData.behaviors = [...template.behaviors];
+                } else if (key === 'formFields') {
+                    campaignData.formFields = [...template.formFields];
+                } else {
+                    campaignData[key] = template[key];
+                }
+            });
+
+            // Update form fields
+            document.getElementById('campaignName').value = template.name;
+            document.getElementById('businessType').value = template.businessType;
+            document.getElementById('description').value = template.description;
+            document.getElementById('budget').value = template.budget;
+            document.getElementById('ageMin').value = template.ageMin;
+            document.getElementById('ageMax').value = template.ageMax;
+            document.getElementById('gender').value = template.gender;
+            document.getElementById('thankYouMessage').value = template.thankYouMessage;
+
+            // Update radio buttons
+            document.querySelector(`input[name="budgetType"][value="${template.budgetType}"]`).checked = true;
+
+            // Update checkboxes for behaviors
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                const label = cb.parentElement.textContent.trim();
+                if (template.behaviors.includes(label)) {
+                    cb.checked = true;
+                }
+            });
+
+            // Update form field checkboxes
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                const parent = cb.parentElement;
+                if (parent.textContent.includes('Full Name')) {
+                    cb.checked = template.formFields.includes('full_name');
+                } else if (parent.textContent.includes('Phone Number')) {
+                    cb.checked = template.formFields.includes('phone_number');
+                } else if (parent.textContent.includes('Company Name')) {
+                    cb.checked = template.formFields.includes('company_name');
+                }
+            });
+
+            // Update character counts and validation
+            updateCharacterCount('campaignName', 'nameCount', 60);
+            updateCharacterCount('description', 'descCount', 300);
+            updateCharacterCount('thankYouMessage', 'thankYouCount', 150);
+            
+            // Update all dependent elements
+            updateProgress();
+            updateAudienceEstimate();
+            updateSummary();
+            updateOptimizationTips();
+            
+            // Hide templates section
+            toggleTemplates();
+        }
+
+        // Toggle templates visibility
+        function toggleTemplates() {
+            const section = document.getElementById('templatesSection');
+            const btn = document.getElementById('toggleTemplatesBtn');
+            const cards = document.getElementById('templateCards');
+            
+            if (cards.style.display === 'none') {
+                cards.style.display = 'grid';
+                btn.textContent = 'Hide Templates';
+            } else {
+                cards.style.display = 'none';
+                btn.textContent = 'Show Templates';
+            }
+        }
+
+        // Auto-populate based on business type
+        function autoPopulateForBusiness(businessType) {
+            const suggestions = businessSuggestions[businessType];
+            if (!suggestions) return;
+
+            // Update suggested interests
+            const container = document.getElementById('suggestedInterests');
+            container.innerHTML = suggestions.interests.map(interest => 
+                `<button onclick="addInterest('${interest}')" style="background-color: #334155; color: #ffffff; font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 0.25rem; border: none; cursor: pointer; transition: background-color 150ms;" onmouseover="this.style.backgroundColor='#475569'" onmouseout="this.style.backgroundColor='#334155'">+ ${interest}</button>`
+            ).join('');
+
+            // Suggest budget
+            document.getElementById('budget').value = suggestions.budget;
+            campaignData.budget = suggestions.budget;
+            updateBudgetRecommendation();
+        }
+
+        // Update field function
+        function updateField(field, value) {
+            campaignData[field] = value;
+            
+            // Update budget label
+            if (field === 'budgetType') {
+                document.getElementById('budgetLabel').textContent = value === 'daily' ? 'per day' : 'total';
+            }
+            
+            updateProgress();
+            updateSummary();
+            updateOptimizationTips();
+        }
+
+        // Update character count
+        function updateCharacterCount(fieldId, countId, maxLength) {
+            const field = document.getElementById(fieldId);
+            const count = document.getElementById(countId);
+            const currentLength = field.value.length;
+            count.textContent = `${currentLength}/${maxLength}`;
+            
+            // Update color based on usage
+            if (currentLength > maxLength * 0.9) {
+                count.style.color = '#f87171';
+            } else if (currentLength > maxLength * 0.7) {
+                count.style.color = '#fbbf24';
+            } else {
+                count.style.color = '#94a3b8';
+            }
+        }
+
+        // Validate field and show strength
+        function validateField(fieldId) {
+            const field = document.getElementById(fieldId);
+            const strengthId = fieldId.replace(/([A-Z])/g, '-$1').toLowerCase() + '-strength';
+            const strength = document.getElementById(strengthId.replace('-', '') + 'Strength');
+            
+            if (!strength) return;
+            
+            const value = field.value.trim();
+            let strengthClass = '';
+            
+            if (fieldId === 'campaignName') {
+                if (value.length < 10) strengthClass = 'strength-weak';
+                else if (value.length < 30) strengthClass = 'strength-good';
+                else strengthClass = 'strength-excellent';
+            } else if (fieldId === 'description') {
+                if (value.length < 50) strengthClass = 'strength-weak';
+                else if (value.length < 150) strengthClass = 'strength-good';
+                else strengthClass = 'strength-excellent';
+            }
+            
+            strength.className = `field-strength ${strengthClass}`;
+        }
+
+        // Update budget recommendation
+        function updateBudgetRecommendation() {
+            const budget = parseInt(document.getElementById('budget').value);
+            const recommendation = document.getElementById('budgetRecommendation');
+            
+            if (budget < 30) {
+                recommendation.innerHTML = '<span style="color: #f87171;">⚠ Low budget may limit reach and performance</span>';
+            } else if (budget >= 30 && budget <= 100) {
+                recommendation.innerHTML = '<span style="color: #4ade80;">✓ Good budget for steady lead generation</span>';
+            } else {
+                recommendation.innerHTML = '<span style="color: #fbbf24;">⚡ High budget for accelerated results</span>';
+            }
+        }
+
+        // Add location
+        function addLocation(location) {
+            if (!campaignData.locations.includes(location)) {
+                campaignData.locations.push(location);
+                updateLocationTags();
+                updateProgress();
+                updateAudienceEstimate();
+                updateSummary();
+            }
+        }
+
+        // Remove location
+        function removeLocation(index) {
+            campaignData.locations.splice(index, 1);
+            updateLocationTags();
+            updateProgress();
+            updateAudienceEstimate();
+            updateSummary();
+        }
+
+        // Update location tags display
+        function updateLocationTags() {
+            const container = document.getElementById('locationTags');
+            container.innerHTML = campaignData.locations.map((location, index) => 
+                `<span style="background-color: rgba(34, 197, 94, 0.2); color: #4ade80; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.25rem;">
+                    ${location}
+                    <button onclick="removeLocation(${index})" style="background: none; border: none; color: #4ade80; padding: 0; margin: 0; cursor: pointer;" onmouseover="this.style.color='#86efac'" onmouseout="this.style.color='#4ade80'">×</button>
+                </span>`
+            ).join('');
+        }
+
+        // Add interest
+        function addInterest(interest) {
+            if (!campaignData.interests.includes(interest)) {
+                campaignData.interests.push(interest);
+                updateInterestTags();
+                updateProgress();
+                updateAudienceEstimate();
+                updateSummary();
+                updateInterestRecommendation();
+            }
+        }
+
+        // Remove interest
+        function removeInterest(index) {
+            campaignData.interests.splice(index, 1);
+            updateInterestTags();
+            updateProgress();
+            updateAudienceEstimate();
+            updateSummary();
+            updateInterestRecommendation();
+        }
+
+        // Update interest tags display
+        function updateInterestTags() {
+            const container = document.getElementById('interestTags');
+            container.innerHTML = campaignData.interests.map((interest, index) => 
+                `<span style="background-color: rgba(34, 197, 94, 0.2); color: #4ade80; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.25rem;">
+                    ${interest}
+                    <button onclick="removeInterest(${index})" style="background: none; border: none; color: #4ade80; padding: 0; margin: 0; cursor: pointer;" onmouseover="this.style.color='#86efac'" onmouseout="this.style.color='#4ade80'">×</button>
+                </span>`
+            ).join('');
+        }
+
+        // Update interest recommendation
+        function updateInterestRecommendation() {
+            const count = campaignData.interests.length;
+            const recommendation = document.getElementById('interestRecommendation');
+            
+            if (count === 0) {
+                recommendation.innerHTML = '<span style="color: #f87171;">Add interests to improve targeting</span>';
+            } else if (count < 3) {
+                recommendation.innerHTML = '<span style="color: #fbbf24;">Consider adding 2-3 more interests for better reach</span>';
+            } else if (count <= 5) {
+                recommendation.innerHTML = '<span style="color: #4ade80;">✓ Good number of interests for optimal targeting</span>';
+            } else {
+                recommendation.innerHTML = '<span style="color: #fbbf24;">Many interests may broaden audience too much</span>';
+            }
+        }
+
+        // Update behavior
+        function updateBehavior(behavior, checked) {
+            if (checked && !campaignData.behaviors.includes(behavior)) {
+                campaignData.behaviors.push(behavior);
+            } else if (!checked) {
+                const index = campaignData.behaviors.indexOf(behavior);
+                if (index > -1) {
+                    campaignData.behaviors.splice(index, 1);
+                }
+            }
+            updateAudienceEstimate();
+        }
+
+        // Update placement
+        function updatePlacement(placement, checked) {
+            if (checked && !campaignData.placements.includes(placement)) {
+                campaignData.placements.push(placement);
+            } else if (!checked) {
+                const index = campaignData.placements.indexOf(placement);
+                if (index > -1) {
+                    campaignData.placements.splice(index, 1);
+                }
+            }
+        }
+
+        // Update form field
+        function updateFormField(field, checked) {
+            if (checked && !campaignData.formFields.includes(field)) {
+                campaignData.formFields.push(field);
+            } else if (!checked) {
+                const index = campaignData.formFields.indexOf(field);
+                if (index > -1) {
+                    campaignData.formFields.splice(index, 1);
+                }
+            }
+            updateSummary();
+        }
+
+        // Update audience estimate
+        function updateAudienceEstimate() {
+            // Simulate audience calculation based on targeting criteria
+            let baseAudience = 5000000; // Base US audience
+            
+            // Adjust for age range
+            const ageRange = parseInt(document.getElementById('ageMax').value) - parseInt(document.getElementById('ageMin').value);
+            baseAudience *= (ageRange / 52); // 52 year total range (13-65)
+            
+            // Adjust for gender
+            if (campaignData.gender !== 'all') {
+                baseAudience *= 0.5;
+            }
+            
+            // Adjust for locations (simplified)
+            if (campaignData.locations.length > 0) {
+                baseAudience *= Math.min(campaignData.locations.length * 0.3, 1);
+            }
+            
+            // Adjust for interests
+            if (campaignData.interests.length > 0) {
+                baseAudience *= Math.max(0.1, 1 - (campaignData.interests.length * 0.15));
+            }
+            
+            // Adjust for behaviors
+            if (campaignData.behaviors.length > 0) {
+                baseAudience *= Math.max(0.05, 1 - (campaignData.behaviors.length * 0.2));
+            }
+            
+            // Format audience size
+            const audienceSize = Math.max(50000, Math.floor(baseAudience));
+            const formatted = audienceSize > 1000000 ? 
+                `${(audienceSize / 1000000).toFixed(1)}M people` : 
+                `${Math.floor(audienceSize / 1000)}K people`;
+            
+            document.getElementById('audienceSize').textContent = formatted;
+            
+            // Calculate weekly reach (10-30% of audience)
+            const weeklyMin = Math.floor(audienceSize * 0.1 / 1000);
+            const weeklyMax = Math.floor(audienceSize * 0.3 / 1000);
+            document.getElementById('weeklyReach').textContent = `${weeklyMin}K - ${weeklyMax}K`;
+            
+            // Update audience indicator
+            const indicator = document.getElementById('audienceIndicator');
+            if (audienceSize < 100000) {
+                indicator.className = 'audience-indicator audience-narrow';
+                indicator.textContent = '⚠ Audience too narrow - consider broader targeting';
+            } else if (audienceSize > 10000000) {
+                indicator.className = 'audience-indicator audience-broad';
+                indicator.textContent = '⚡ Very broad audience - consider more specific targeting';
+            } else {
+                indicator.className = 'audience-indicator audience-optimal';
+                indicator.textContent = '✓ Optimal audience size for lead generation';
+            }
+        }
+
+        // Update progress (simplified without progress bar)
+        function updateProgress() {
+            // Update proceed button based on form completion
+            let progress = 0;
+            
+            // Campaign basics (20%)
+            if (campaignData.name && campaignData.businessType && campaignData.description) {
+                progress += 20;
+            }
+            
+            // Budget (15%)
+            if (campaignData.budget >= 5) {
+                progress += 15;
+            }
+            
+            // Demographics (15%)
+            if (campaignData.ageMin && campaignData.ageMax && campaignData.gender) {
+                progress += 15;
+            }
+            
+            // Locations (15%)
+            if (campaignData.locations.length > 0) {
+                progress += 15;
+            }
+            
+            // Interests (10%)
+            if (campaignData.interests.length > 0) {
+                progress += 10;
+            }
+            
+            // Placements (10%)
+            if (campaignData.placements.length > 0) {
+                progress += 10;
+            }
+            
+            // Lead form (15%)
+            if (campaignData.privacyPolicyUrl && campaignData.formFields.length > 0) {
+                progress += 15;
+            }
+            
+            // Update proceed button
+            const proceedBtn = document.getElementById('proceedBtn');
+            if (progress >= 85) {
+                proceedBtn.disabled = false;
+                proceedBtn.style.opacity = '1';
+                proceedBtn.parentElement.querySelector('p').textContent = 'Ready to create amazing ad content!';
+            } else {
+                proceedBtn.disabled = true;
+                proceedBtn.style.opacity = '0.5';
+                proceedBtn.parentElement.querySelector('p').textContent = 'Complete all required fields to continue';
+            }
+        }
+
+        // Update summary
+        function updateSummary() {
+            document.getElementById('summaryBusinessType').textContent = campaignData.businessType || 'Not selected';
+            document.getElementById('summaryBudget').textContent = `$${campaignData.budget}`;
+            document.getElementById('summaryLocations').textContent = `${campaignData.locations.length} selected`;
+            document.getElementById('summaryInterests').textContent = `${campaignData.interests.length} selected`;
+            document.getElementById('summaryFormFields').textContent = `${campaignData.formFields.length} fields`;
+        }
+
+        // Update optimization tips
+        function updateOptimizationTips() {
+            const tips = [];
+            
+            if (!campaignData.businessType) {
+                tips.push('• Select your business type to get personalized recommendations');
+            }
+            
+            if (campaignData.interests.length < 3) {
+                tips.push('• Add 3-5 interests for optimal targeting');
+            }
+            
+            if (campaignData.locations.length === 0) {
+                tips.push('• Add target locations to reach your ideal customers');
+            }
+            
+            if (campaignData.budget < 50) {
+                tips.push('• Consider increasing budget to $50+ for better performance');
+            }
+            
+            if (campaignData.formFields.length > 3) {
+                tips.push('• Fewer form fields typically increase conversion rates');
+            }
+            
+            if (!campaignData.description || campaignData.description.length < 50) {
+                tips.push('• Add a detailed campaign description for better optimization');
+            }
+            
+            if (tips.length === 0) {
+                tips.push('✓ Great setup! Your campaign is optimized for success');
+                tips.push('✓ Consider A/B testing different creatives');
+                tips.push('✓ Monitor performance and adjust targeting as needed');
+            }
+            
+            document.getElementById('optimizationTips').innerHTML = tips.join('<br>');
+        }
+
+        // Validate form
+        function validateForm() {
+            let isValid = true;
+            
+            // Reset errors
+            document.querySelectorAll('[id$="Error"]').forEach(el => el.style.display = 'none');
+
+            // Validate required fields
+            if (!campaignData.name) {
+                document.getElementById('nameError').style.display = 'block';
+                isValid = false;
+            }
+            if (!campaignData.businessType) {
+                document.getElementById('businessTypeError').style.display = 'block';
+                isValid = false;
+            }
+            if (!campaignData.description) {
+                document.getElementById('descriptionError').style.display = 'block';
+                isValid = false;
+            }
+            if (campaignData.budget < 5) {
+                document.getElementById('budgetError').style.display = 'block';
+                isValid = false;
+            }
+            if (campaignData.locations.length === 0) {
+                document.getElementById('locationsError').style.display = 'block';
+                isValid = false;
+            }
+            if (!campaignData.privacyPolicyUrl) {
+                document.getElementById('privacyUrlError').style.display = 'block';
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        // Save campaign
+        function saveCampaign() {
+            if (validateForm()) {
+                console.log('Campaign data saved for approval:', campaignData);
+                alert('Campaign saved for approval! Check console for data.');
+            }
+        }
+
+        // Proceed to creative
+        function proceedToCreative() {
+            if (validateForm()) {
+                console.log('Proceeding to creative generation with campaign data:', campaignData);
+                alert('Proceeding to Creative Generation! Campaign data logged to console.');
+                // Here you would navigate to the creative generation page
+                // window.location.href = '/creative-generation';
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('startDate').value = today;
+            document.getElementById('startDate').min = today;
+            document.getElementById('endDate').min = today;
+            
+            // Initialize character counts
+            updateCharacterCount('thankYouMessage', 'thankYouCount', 150);
+            
+            // Initialize estimates and other functions
+            updateAudienceEstimate();
+            updateSummary();
+            updateOptimizationTips();
+            updateBudgetRecommendation();
+            updateProgress();
+        });
+    </script>
+
+</body>
+</html>
