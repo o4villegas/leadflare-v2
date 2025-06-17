@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import type { Route } from "./+types/createCampaign";
 
-export function meta({}: Route.MetaArgs) {
+export function meta() {
   return [
     { title: "Create Campaign - LeadFlare" },
     { name: "description", content: "Create a new AI-powered lead generation campaign" },
@@ -14,10 +13,6 @@ interface CampaignData {
   name: string;
   businessType: string;
   description: string;
-  budgetType: 'daily' | 'lifetime';
-  budget: number;
-  startDate: string;
-  endDate: string;
   ageMin: number;
   ageMax: number;
   gender: 'all' | 'male' | 'female';
@@ -36,8 +31,6 @@ interface Template {
   name: string;
   businessType: string;
   description: string;
-  budget: number;
-  budgetType: 'daily' | 'lifetime';
   ageMin: number;
   ageMax: number;
   gender: 'all' | 'male' | 'female';
@@ -53,9 +46,9 @@ interface Template {
 
 interface BusinessSuggestion {
   interests: string[];
-  budget: number;
   locations: string[];
   behaviors: string[];
+  recommendedBudget: number; // Keep for reference but don't set
 }
 
 // Templates data
@@ -64,8 +57,6 @@ const templates: Record<string, Template> = {
     name: 'SaaS Lead Generation Campaign',
     businessType: 'Technology',
     description: 'Generate high-quality leads for our software solution targeting business professionals and decision makers.',
-    budget: 75,
-    budgetType: 'daily',
     ageMin: 25,
     ageMax: 55,
     gender: 'all',
@@ -82,8 +73,6 @@ const templates: Record<string, Template> = {
     name: 'Real Estate Lead Generation',
     businessType: 'Real Estate',
     description: 'Connect with potential home buyers and sellers in our local market area.',
-    budget: 50,
-    budgetType: 'daily',
     ageMin: 25,
     ageMax: 65,
     gender: 'all',
@@ -100,8 +89,6 @@ const templates: Record<string, Template> = {
     name: 'Healthcare Services Campaign',
     businessType: 'Healthcare',
     description: 'Attract patients seeking quality healthcare and wellness services in our area.',
-    budget: 60,
-    budgetType: 'daily',
     ageMin: 25,
     ageMax: 65,
     gender: 'all',
@@ -120,31 +107,31 @@ const templates: Record<string, Template> = {
 const businessSuggestions: Record<string, BusinessSuggestion> = {
   'Technology': {
     interests: ['Technology', 'Software', 'Cloud Computing', 'Artificial Intelligence', 'Digital Marketing'],
-    budget: 75,
+    recommendedBudget: 75,
     locations: ['United States', 'San Francisco', 'Seattle', 'Austin', 'New York'],
     behaviors: ['Technology early adopters', 'Small business owners']
   },
   'Healthcare': {
     interests: ['Health and wellness', 'Healthcare', 'Medical services', 'Fitness', 'Nutrition'],
-    budget: 60,
+    recommendedBudget: 60,
     locations: ['United States'],
     behaviors: []
   },
   'Real Estate': {
     interests: ['Real estate', 'Home buying', 'Investment', 'Property management'],
-    budget: 50,
+    recommendedBudget: 50,
     locations: ['Local area'],
     behaviors: ['Home buyers', 'Real estate investors']
   },
   'Finance': {
     interests: ['Finance', 'Investment', 'Banking', 'Insurance', 'Financial planning'],
-    budget: 80,
+    recommendedBudget: 80,
     locations: ['United States'],
     behaviors: ['Small business owners', 'Frequent travelers']
   },
   'Education': {
     interests: ['Education', 'Online learning', 'Professional development', 'Skill building'],
-    budget: 45,
+    recommendedBudget: 45,
     locations: ['United States'],
     behaviors: []
   }
@@ -157,10 +144,6 @@ export default function CreateCampaign() {
     name: '',
     businessType: '',
     description: '',
-    budgetType: 'daily',
-    budget: 50,
-    startDate: '',
-    endDate: '',
     ageMin: 18,
     ageMax: 65,
     gender: 'all',
@@ -178,12 +161,6 @@ export default function CreateCampaign() {
   const [errors, setErrors] = useState<Record<string, boolean>>({});
   const [audienceSize, setAudienceSize] = useState('2.3M people');
   const [weeklyReach, setWeeklyReach] = useState('450K - 780K');
-
-  // Initialize dates on component mount
-  useEffect(() => {
-    const today = new Date().toISOString().split('T')[0];
-    setCampaignData(prev => ({ ...prev, startDate: today }));
-  }, []);
 
   // Update campaign data
   const updateField = (field: keyof CampaignData, value: any) => {
@@ -209,12 +186,9 @@ export default function CreateCampaign() {
     setShowTemplates(false);
   };
 
-  // Auto-populate based on business type
-  const autoPopulateForBusiness = (businessType: string) => {
-    const suggestions = businessSuggestions[businessType];
-    if (suggestions) {
-      setCampaignData(prev => ({ ...prev, budget: suggestions.budget }));
-    }
+  // Get recommended budget for display
+  const getRecommendedBudget = (businessType: string) => {
+    return businessSuggestions[businessType]?.recommendedBudget || 50;
   };
 
   // Add/remove location
@@ -271,7 +245,7 @@ export default function CreateCampaign() {
     }
   };
 
-  // Calculate audience estimate
+  // Calculate audience estimate using default budget for calculation
   const calculateAudienceEstimate = () => {
     let baseAudience = 5000000;
     const ageRange = campaignData.ageMax - campaignData.ageMin;
@@ -306,7 +280,6 @@ export default function CreateCampaign() {
     if (!campaignData.name) newErrors.name = true;
     if (!campaignData.businessType) newErrors.businessType = true;
     if (!campaignData.description) newErrors.description = true;
-    if (campaignData.budget < 5) newErrors.budget = true;
     if (campaignData.locations.length === 0) newErrors.locations = true;
     if (!campaignData.privacyPolicyUrl) newErrors.privacyPolicyUrl = true;
 
@@ -319,7 +292,6 @@ export default function CreateCampaign() {
     return campaignData.name && 
            campaignData.businessType && 
            campaignData.description && 
-           campaignData.budget >= 5 && 
            campaignData.locations.length > 0 &&
            campaignData.privacyPolicyUrl;
   };
@@ -328,7 +300,12 @@ export default function CreateCampaign() {
   const proceedToCreative = () => {
     if (validateForm()) {
       console.log('Campaign data:', campaignData);
-      navigate('/generateCreative');
+      navigate('/generateCreative', { 
+        state: { 
+          campaignData: campaignData,
+          recommendedBudget: getRecommendedBudget(campaignData.businessType)
+        }
+      });
     }
   };
 
@@ -365,7 +342,7 @@ export default function CreateCampaign() {
         {/* Page Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">Create New Campaign</h1>
-          <p className="text-slate-300">Configure your Meta lead generation campaign with intelligent targeting and optimization</p>
+          <p className="text-slate-300">Configure your audience targeting and lead capture settings. Budget will be set in the next steps.</p>
         </div>
 
         {/* Quick Start Templates */}
@@ -390,7 +367,7 @@ export default function CreateCampaign() {
                 <p className="text-sm text-slate-400 mb-3">Target business professionals interested in software solutions</p>
                 <div className="flex flex-wrap gap-1">
                   <span className="bg-slate-700 text-slate-300 px-2 py-1 rounded text-xs">Technology</span>
-                  <span className="bg-slate-700 text-slate-300 px-2 py-1 rounded text-xs">$75/day</span>
+                  <span className="bg-slate-700 text-slate-300 px-2 py-1 rounded text-xs">Rec: $75/day</span>
                   <span className="bg-slate-700 text-slate-300 px-2 py-1 rounded text-xs">Business Tools</span>
                 </div>
               </div>
@@ -403,7 +380,7 @@ export default function CreateCampaign() {
                 <p className="text-sm text-slate-400 mb-3">Attract potential home buyers and sellers in your area</p>
                 <div className="flex flex-wrap gap-1">
                   <span className="bg-slate-700 text-slate-300 px-2 py-1 rounded text-xs">Real Estate</span>
-                  <span className="bg-slate-700 text-slate-300 px-2 py-1 rounded text-xs">$50/day</span>
+                  <span className="bg-slate-700 text-slate-300 px-2 py-1 rounded text-xs">Rec: $50/day</span>
                   <span className="bg-slate-700 text-slate-300 px-2 py-1 rounded text-xs">Local Targeting</span>
                 </div>
               </div>
@@ -416,7 +393,7 @@ export default function CreateCampaign() {
                 <p className="text-sm text-slate-400 mb-3">Connect with patients seeking medical and wellness services</p>
                 <div className="flex flex-wrap gap-1">
                   <span className="bg-slate-700 text-slate-300 px-2 py-1 rounded text-xs">Healthcare</span>
-                  <span className="bg-slate-700 text-slate-300 px-2 py-1 rounded text-xs">$60/day</span>
+                  <span className="bg-slate-700 text-slate-300 px-2 py-1 rounded text-xs">Rec: $60/day</span>
                   <span className="bg-slate-700 text-slate-300 px-2 py-1 rounded text-xs">Health & Wellness</span>
                 </div>
               </div>
@@ -449,10 +426,7 @@ export default function CreateCampaign() {
                   <label className="block text-sm font-medium mb-2">Business Type</label>
                   <select
                     value={campaignData.businessType}
-                    onChange={(e) => {
-                      updateField('businessType', e.target.value);
-                      autoPopulateForBusiness(e.target.value);
-                    }}
+                    onChange={(e) => updateField('businessType', e.target.value)}
                     className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none"
                   >
                     <option value="">Select business type</option>
@@ -483,77 +457,19 @@ export default function CreateCampaign() {
                 />
                 {errors.description && <p className="text-red-400 text-sm mt-1">Campaign description is required</p>}
               </div>
-            </div>
 
-            {/* Budget & Schedule */}
-            <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
-              <h2 className="text-xl font-semibold mb-6">Budget & Schedule</h2>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium mb-2">Budget Type</label>
-                  <div className="flex gap-4">
-                    <label className="flex items-center">
-                      <input 
-                        type="radio" 
-                        name="budgetType" 
-                        value="daily" 
-                        checked={campaignData.budgetType === 'daily'}
-                        onChange={(e) => updateField('budgetType', e.target.value)}
-                        className="mr-2 accent-green-500" 
-                      />
-                      Daily
-                    </label>
-                    <label className="flex items-center">
-                      <input 
-                        type="radio" 
-                        name="budgetType" 
-                        value="lifetime" 
-                        checked={campaignData.budgetType === 'lifetime'}
-                        onChange={(e) => updateField('budgetType', e.target.value)}
-                        className="mr-2 accent-green-500" 
-                      />
-                      Lifetime
-                    </label>
+              {/* Budget Recommendation */}
+              {campaignData.businessType && (
+                <div className="mt-6 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <span className="text-green-400">💡</span>
+                    <span className="text-sm text-green-400">
+                      Recommended budget for {campaignData.businessType}: <strong>${getRecommendedBudget(campaignData.businessType)}/day</strong>
+                    </span>
                   </div>
+                  <p className="text-xs text-green-400 mt-1 ml-6">Budget will be finalized in the approval step</p>
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Budget Amount ${campaignData.budgetType === 'daily' ? '(per day)' : '(total)'}
-                  </label>
-                  <input
-                    type="number"
-                    value={campaignData.budget}
-                    onChange={(e) => updateField('budget', parseInt(e.target.value) || 0)}
-                    min="5"
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none"
-                  />
-                  {errors.budget && <p className="text-red-400 text-sm mt-1">Minimum budget is $5</p>}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                <div>
-                  <label className="block text-sm font-medium mb-2">Start Date</label>
-                  <input
-                    type="date"
-                    value={campaignData.startDate}
-                    onChange={(e) => updateField('startDate', e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">End Date (Optional)</label>
-                  <input
-                    type="date"
-                    value={campaignData.endDate}
-                    onChange={(e) => updateField('endDate', e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none"
-                  />
-                </div>
-              </div>
+              )}
             </div>
 
             {/* Audience Targeting */}
@@ -846,8 +762,10 @@ export default function CreateCampaign() {
                   <span className="text-slate-300">{campaignData.businessType || 'Not selected'}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Daily Budget:</span>
-                  <span className="text-slate-300">${campaignData.budget}</span>
+                  <span className="text-slate-400">Recommended Budget:</span>
+                  <span className="text-slate-300">
+                    {campaignData.businessType ? `$${getRecommendedBudget(campaignData.businessType)}/day` : 'Select business type'}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400">Locations:</span>
@@ -861,21 +779,26 @@ export default function CreateCampaign() {
                   <span className="text-slate-400">Form Fields:</span>
                   <span className="text-slate-300">{campaignData.formFields.length} fields</span>
                 </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Placements:</span>
+                  <span className="text-slate-300">{campaignData.placements.length} platforms</span>
+                </div>
               </div>
             </div>
             
             {/* Optimization Tips */}
             <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
-              <h3 className="text-lg font-semibold mb-4">Optimization Tips</h3>
+              <h3 className="text-lg font-semibold mb-4">Next Steps</h3>
               <div className="text-sm text-slate-400 leading-relaxed">
                 {isFormComplete() ? (
                   <div className="space-y-2">
-                    <div className="text-green-400">✓ Great setup! Your campaign is optimized for success</div>
-                    <div>✓ Consider A/B testing different creatives</div>
-                    <div>✓ Monitor performance and adjust targeting as needed</div>
+                    <div className="text-green-400">✓ Targeting configuration complete!</div>
+                    <div>• Generate AI-powered creatives</div>
+                    <div>• Review performance projections</div>
+                    <div>• Set final budget and launch</div>
                   </div>
                 ) : (
-                  'Complete your campaign details to see personalized optimization recommendations.'
+                  'Complete your targeting details to proceed to creative generation.'
                 )}
               </div>
             </div>
