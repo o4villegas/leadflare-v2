@@ -29,9 +29,8 @@ interface CreativeOptions {
 export default function GenerateCreative() {
   const navigate = useNavigate();
   const location = useLocation();
-  
   // Get campaign data from previous step (same pattern as your other components)
-  const campaignData = location.state?.campaignData || {
+  const campaignData = location?.state?.campaignData || {
     name: 'Sample Campaign',
     businessType: 'Technology',
     description: 'Lead generation campaign',
@@ -45,6 +44,7 @@ export default function GenerateCreative() {
   // State management
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatingSection, setGeneratingSection] = useState<string | null>(null);
+  const [generationError, setGenerationError] = useState<string | null>(null);
   const [creativeOptions, setCreativeOptions] = useState<CreativeOptions>({
     headlines: [],
     descriptions: [],
@@ -60,9 +60,35 @@ export default function GenerateCreative() {
   const [editingItem, setEditingItem] = useState<{ item: Creative; type: string } | null>(null);
   const [editText, setEditText] = useState('');
 
+  // Auto-select highest scoring option when new creatives are generated
+  const autoSelectHighestScoring = (sectionType: string, newCreatives: Creative[]) => {
+    if (newCreatives.length > 0) {
+      const highestScoring = newCreatives.reduce((prev, current) => 
+        prev.score > current.score ? prev : current
+      );
+      
+      // Update selected creatives
+      setSelectedCreatives(prev => ({ 
+        ...prev, 
+        [sectionType]: highestScoring 
+      }));
+      
+      // Update isSelected state
+      const sectionKey = `${sectionType}s` as keyof CreativeOptions;
+      setCreativeOptions(prev => ({
+        ...prev,
+        [sectionKey]: newCreatives.map(item => ({
+          ...item,
+          isSelected: item.id === highestScoring.id
+        }))
+      }));
+    }
+  };
+
   // Generate all creatives (matches your backend API pattern)
-  const generateCreatives = async () => {
+  const generateCreatives = async (retry = false) => {
     setIsGenerating(true);
+    setGenerationError(null);
     
     try {
       // Single API call to your workers/ai.ts endpoint
@@ -78,46 +104,67 @@ export default function GenerateCreative() {
             ageRange: `${campaignData.ageMin}-${campaignData.ageMax}`,
             locations: campaignData.locations || [],
             budget: campaignData.budget
-          }
+          },
+          retry: retry
         })
       });
 
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
-          setCreativeOptions({
+          const newOptions = {
             headlines: data.creatives.headlines || [],
             descriptions: data.creatives.descriptions || [],
             ctas: data.creatives.ctas || [],
             images: data.creatives.images || []
-          });
+          };
+          
+          setCreativeOptions(newOptions);
+          
+          // Auto-select highest scoring options for each category
+          if (newOptions.headlines.length > 0) autoSelectHighestScoring('headline', newOptions.headlines);
+          if (newOptions.descriptions.length > 0) autoSelectHighestScoring('description', newOptions.descriptions);
+          if (newOptions.ctas.length > 0) autoSelectHighestScoring('cta', newOptions.ctas);
+          if (newOptions.images.length > 0) autoSelectHighestScoring('image', newOptions.images);
+        } else {
+          throw new Error(data.error || 'Failed to generate creatives');
         }
       } else {
         throw new Error('API request failed');
       }
     } catch (error) {
       console.warn('AI generation failed, using fallback data:', error);
+      setGenerationError(error instanceof Error ? error.message : 'Generation failed');
+      
       // Fallback to mock data (for development)
-      setCreativeOptions({
+      const fallbackOptions = {
         headlines: [
-          { id: '1', type: 'headline', content: 'Transform Your Business with AI Solutions', score: 94, isSelected: false },
-          { id: '2', type: 'headline', content: 'Boost Productivity by 40% Starting Today', score: 91, isSelected: false },
-          { id: '3', type: 'headline', content: 'Join 10,000+ Companies Using Our Platform', score: 88, isSelected: false }
+          { id: '1', type: 'headline' as const, content: 'Transform Your Business with AI Solutions', score: 94, isSelected: false },
+          { id: '2', type: 'headline' as const, content: 'Boost Productivity by 40% Starting Today', score: 91, isSelected: false },
+          { id: '3', type: 'headline' as const, content: 'Join 10,000+ Companies Using Our Platform', score: 88, isSelected: false }
         ],
         descriptions: [
-          { id: '1', type: 'description', content: 'Streamline workflows with intelligent automation. Built for modern teams.', score: 89, isSelected: false },
-          { id: '2', type: 'description', content: 'Cut costs while boosting efficiency. Integrates with existing tools.', score: 93, isSelected: false }
+          { id: '1', type: 'description' as const, content: 'Streamline workflows with intelligent automation. Built for modern teams that need results fast.', score: 89, isSelected: false },
+          { id: '2', type: 'description' as const, content: 'Cut costs while boosting efficiency. Integrates seamlessly with your existing tools.', score: 93, isSelected: false }
         ],
         ctas: [
-          { id: '1', type: 'cta', content: 'Start Free Trial', score: 96, isSelected: false },
-          { id: '2', type: 'cta', content: 'Get Demo', score: 89, isSelected: false },
-          { id: '3', type: 'cta', content: 'Learn More', score: 83, isSelected: false }
+          { id: '1', type: 'cta' as const, content: 'Start Free Trial', score: 96, isSelected: false },
+          { id: '2', type: 'cta' as const, content: 'Get Demo', score: 89, isSelected: false },
+          { id: '3', type: 'cta' as const, content: 'Learn More', score: 83, isSelected: false }
         ],
         images: [
-          { id: '1', type: 'image', content: 'Team collaboration', imageUrl: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=250&fit=crop', score: 90, isSelected: false },
-          { id: '2', type: 'image', content: 'Modern workspace', imageUrl: 'https://images.unsplash.com/photo-1551434678-e076c223a692?w=400&h=250&fit=crop', score: 87, isSelected: false }
+          { id: '1', type: 'image' as const, content: 'Team collaboration', imageUrl: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=250&fit=crop', score: 90, isSelected: false },
+          { id: '2', type: 'image' as const, content: 'Modern workspace', imageUrl: 'https://images.unsplash.com/photo-1551434678-e076c223a692?w=400&h=250&fit=crop', score: 87, isSelected: false }
         ]
-      });
+      };
+      
+      setCreativeOptions(fallbackOptions);
+      
+      // Auto-select highest scoring options for fallback data too
+      autoSelectHighestScoring('headline', fallbackOptions.headlines);
+      autoSelectHighestScoring('description', fallbackOptions.descriptions);
+      autoSelectHighestScoring('cta', fallbackOptions.ctas);
+      autoSelectHighestScoring('image', fallbackOptions.images);
     } finally {
       setIsGenerating(false);
     }
@@ -126,6 +173,7 @@ export default function GenerateCreative() {
   // Regenerate specific section
   const regenerateSection = async (sectionType: string) => {
     setGeneratingSection(sectionType);
+    setGenerationError(null);
     
     try {
       const response = await fetch('/api/ai/generate-creatives', {
@@ -141,7 +189,7 @@ export default function GenerateCreative() {
             locations: campaignData.locations || [],
             budget: campaignData.budget
           },
-          contentType: sectionType, // Tell backend to generate only this type
+          contentType: sectionType,
           regenerate: true
         })
       });
@@ -153,10 +201,18 @@ export default function GenerateCreative() {
             ...prev,
             [sectionType]: data.creatives
           }));
+          
+          // Auto-select highest scoring option in regenerated section
+          autoSelectHighestScoring(sectionType.slice(0, -1), data.creatives); // Remove 's' from end
+        } else {
+          throw new Error(data.error || 'Failed to regenerate content');
         }
+      } else {
+        throw new Error('API request failed');
       }
     } catch (error) {
       console.warn(`Failed to regenerate ${sectionType}:`, error);
+      setGenerationError(`Failed to regenerate ${sectionType}. Please try again.`);
     } finally {
       setGeneratingSection(null);
     }
@@ -212,7 +268,7 @@ export default function GenerateCreative() {
     setEditText('');
   };
 
-  // Navigation
+  // Navigation functions
   const proceedToApproval = () => {
     navigate('/approveLaunch', { 
       state: { 
@@ -223,6 +279,20 @@ export default function GenerateCreative() {
   };
 
   const goBack = () => {
+    navigate('/createCampaign', { 
+      state: { campaignData }
+    });
+  };
+
+  const navigateToHome = () => {
+    navigate('/');
+  };
+
+  const navigateToCampaigns = () => {
+    navigate('/campaignManager');
+  };
+
+  const navigateToCreateCampaign = () => {
     navigate('/createCampaign');
   };
 
@@ -231,17 +301,42 @@ export default function GenerateCreative() {
 
   return (
     <div className="bg-slate-900 text-white min-h-screen">
-      {/* Navigation - matches your existing pattern */}
-      <nav className="border-b border-slate-700 bg-slate-900/80 backdrop-blur-sm px-6">
-        <div className="max-w-7xl mx-auto flex items-center justify-between h-24">
+      {/* Header */}
+      <header className="bg-slate-800/50 backdrop-blur border-b border-slate-700">
+        <div className="max-w-7xl mx-auto flex items-center justify-between h-24 px-6">
           <div className="flex items-center">
             <div className="w-20 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center font-bold text-slate-900 text-lg">
               LOGO
             </div>
           </div>
+          
+          <nav className="flex items-center gap-8">
+            <button 
+              onClick={navigateToHome}
+              className="text-slate-300 hover:text-white font-medium transition-colors"
+            >
+              Dashboard
+            </button>
+            <button 
+              onClick={navigateToCampaigns}
+              className="text-slate-300 hover:text-white font-medium transition-colors"
+            >
+              Campaigns
+            </button>
+            <button 
+              onClick={navigateToCreateCampaign}
+              className="text-slate-300 hover:text-white font-medium transition-colors"
+            >
+              Create Campaign
+            </button>
+            <button className="text-white font-semibold bg-green-500/20 px-4 py-2 rounded-lg">
+              Generate Creative
+            </button>
+          </nav>
+
           <div className="flex items-center gap-4">
             <button 
-              onClick={generateCreatives}
+              onClick={() => generateCreatives(true)}
               disabled={isGenerating}
               className="text-green-400 hover:text-green-300 px-3 py-2 rounded-md text-sm font-medium transition-colors disabled:opacity-50"
             >
@@ -255,7 +350,7 @@ export default function GenerateCreative() {
             </button>
           </div>
         </div>
-      </nav>
+      </header>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Page Header */}
@@ -268,6 +363,33 @@ export default function GenerateCreative() {
           </div>
         </div>
 
+        {/* Error Alert */}
+        {generationError && (
+          <div className="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-red-400">⚠️</span>
+                <span className="text-red-400">{generationError}</span>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => generateCreatives(true)}
+                  disabled={isGenerating}
+                  className="px-3 py-1 bg-red-500/20 text-red-400 rounded text-sm font-medium hover:bg-red-500/30 transition-colors disabled:opacity-50"
+                >
+                  Retry AI Generation
+                </button>
+                <button
+                  onClick={() => setGenerationError(null)}
+                  className="px-3 py-1 bg-slate-600 text-slate-300 rounded text-sm font-medium hover:bg-slate-500 transition-colors"
+                >
+                  Continue with Manual Entry
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Creative Options */}
           <div className="lg:col-span-2 space-y-8">
@@ -279,7 +401,7 @@ export default function GenerateCreative() {
                 <button 
                   onClick={() => regenerateSection('headlines')}
                   disabled={generatingSection === 'headlines'}
-                  className="text-sm text-green-400 hover:text-green-300 flex items-center gap-1 disabled:opacity-50"
+                  className="text-sm text-green-400 hover:text-green-300 flex items-center gap-2 disabled:opacity-50 transition-colors"
                 >
                   {generatingSection === 'headlines' ? (
                     <>
@@ -292,56 +414,76 @@ export default function GenerateCreative() {
                 </button>
               </div>
               
-              <div className="space-y-3">
-                {creativeOptions.headlines.map((headline) => (
-                  <div key={headline.id}>
-                    {editingItem?.item.id === headline.id ? (
-                      <div className="p-4 rounded-lg border-2 border-green-500 bg-green-500/10">
-                        <textarea
-                          value={editText}
-                          onChange={(e) => setEditText(e.target.value)}
-                          className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none resize-none"
-                          rows={2}
-                          maxLength={100}
-                        />
-                        <div className="flex items-center justify-between mt-3">
-                          <span className="text-xs text-slate-400">{editText.length}/100</span>
-                          <div className="flex gap-2">
-                            <button onClick={cancelEdit} className="px-3 py-1 bg-slate-600 hover:bg-slate-500 text-white rounded text-xs">
-                              Cancel
-                            </button>
-                            <button onClick={saveEdit} className="px-3 py-1 bg-green-500 hover:bg-green-600 text-slate-900 rounded text-xs font-medium">
-                              Save
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div 
-                        onClick={() => selectCreative('headline', headline)}
-                        className={`p-4 rounded-lg border-2 cursor-pointer transition-all group ${
-                          headline.isSelected ? 'border-green-500 bg-green-500/10' : 'border-slate-600 hover:border-slate-500'
-                        }`}
-                      >
-                        <div className="flex items-start justify-between">
-                          <p className="text-white font-medium flex-1">{headline.content}</p>
-                          <div className="flex items-center gap-2 ml-4">
-                            <button
-                              onClick={(e) => { e.stopPropagation(); startEdit(headline, 'headline'); }}
-                              className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-700 rounded transition-all"
-                            >
-                              ✏️
-                            </button>
-                            <div className="text-right">
-                              <div className="text-xs text-slate-400">Score</div>
-                              <div className="text-green-400 font-semibold">{headline.score}%</div>
+              <div className="space-y-4">
+                {creativeOptions.headlines.length === 0 && !isGenerating ? (
+                  <div className="text-center py-8 text-slate-400">
+                    <div className="text-2xl mb-2">✍️</div>
+                    <p className="text-sm">No headlines generated yet</p>
+                    <button
+                      onClick={() => regenerateSection('headlines')}
+                      className="mt-2 px-4 py-2 bg-green-500/20 text-green-400 rounded-lg text-sm font-medium hover:bg-green-500/30 transition-colors"
+                    >
+                      Generate Headlines
+                    </button>
+                  </div>
+                ) : (
+                  creativeOptions.headlines.map((headline) => (
+                    <div key={headline.id}>
+                      {editingItem?.item.id === headline.id ? (
+                        <div className="p-4 rounded-lg border-2 border-green-500 bg-green-500/10">
+                          <textarea
+                            value={editText}
+                            onChange={(e) => setEditText(e.target.value)}
+                            className="w-full px-3 py-3 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none resize-none transition-colors"
+                            rows={2}
+                            maxLength={100}
+                          />
+                          <div className="flex items-center justify-between mt-3">
+                            <span className="text-xs text-slate-400">{editText.length}/100</span>
+                            <div className="flex gap-2">
+                              <button 
+                                onClick={cancelEdit} 
+                                className="px-3 py-1 bg-slate-600 hover:bg-slate-500 text-white rounded text-xs transition-colors"
+                              >
+                                Cancel
+                              </button>
+                              <button 
+                                onClick={saveEdit} 
+                                className="px-3 py-1 bg-green-500 hover:bg-green-600 text-slate-900 rounded text-xs font-medium transition-colors"
+                              >
+                                Save
+                              </button>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
+                      ) : (
+                        <div 
+                          onClick={() => selectCreative('headline', headline)}
+                          className={`p-4 rounded-lg border-2 cursor-pointer transition-all group ${
+                            headline.isSelected ? 'border-green-500 bg-green-500/10' : 'border-slate-600 hover:border-slate-500'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between">
+                            <p className="text-white font-medium flex-1 pr-4">{headline.content}</p>
+                            <div className="flex items-center gap-3 flex-shrink-0">
+                              <button
+                                onClick={(e) => { e.stopPropagation(); startEdit(headline, 'headline'); }}
+                                className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-700 rounded transition-all"
+                                title="Edit headline"
+                              >
+                                ✏️
+                              </button>
+                              <div className="text-right">
+                                <div className="text-xs text-slate-400">Score</div>
+                                <div className="text-green-400 font-semibold">{headline.score}%</div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 
@@ -352,7 +494,7 @@ export default function GenerateCreative() {
                 <button 
                   onClick={() => regenerateSection('descriptions')}
                   disabled={generatingSection === 'descriptions'}
-                  className="text-sm text-green-400 hover:text-green-300 flex items-center gap-1 disabled:opacity-50"
+                  className="text-sm text-green-400 hover:text-green-300 flex items-center gap-2 disabled:opacity-50 transition-colors"
                 >
                   {generatingSection === 'descriptions' ? (
                     <>
@@ -365,56 +507,76 @@ export default function GenerateCreative() {
                 </button>
               </div>
               
-              <div className="space-y-3">
-                {creativeOptions.descriptions.map((desc) => (
-                  <div key={desc.id}>
-                    {editingItem?.item.id === desc.id ? (
-                      <div className="p-4 rounded-lg border-2 border-green-500 bg-green-500/10">
-                        <textarea
-                          value={editText}
-                          onChange={(e) => setEditText(e.target.value)}
-                          className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none resize-none"
-                          rows={3}
-                          maxLength={250}
-                        />
-                        <div className="flex items-center justify-between mt-3">
-                          <span className="text-xs text-slate-400">{editText.length}/250</span>
-                          <div className="flex gap-2">
-                            <button onClick={cancelEdit} className="px-3 py-1 bg-slate-600 hover:bg-slate-500 text-white rounded text-xs">
-                              Cancel
-                            </button>
-                            <button onClick={saveEdit} className="px-3 py-1 bg-green-500 hover:bg-green-600 text-slate-900 rounded text-xs font-medium">
-                              Save
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div 
-                        onClick={() => selectCreative('description', desc)}
-                        className={`p-4 rounded-lg border-2 cursor-pointer transition-all group ${
-                          desc.isSelected ? 'border-green-500 bg-green-500/10' : 'border-slate-600 hover:border-slate-500'
-                        }`}
-                      >
-                        <div className="flex items-start justify-between">
-                          <p className="text-white flex-1">{desc.content}</p>
-                          <div className="flex items-center gap-2 ml-4">
-                            <button
-                              onClick={(e) => { e.stopPropagation(); startEdit(desc, 'description'); }}
-                              className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-700 rounded transition-all"
-                            >
-                              ✏️
-                            </button>
-                            <div className="text-right">
-                              <div className="text-xs text-slate-400">Score</div>
-                              <div className="text-green-400 font-semibold">{desc.score}%</div>
+              <div className="space-y-4">
+                {creativeOptions.descriptions.length === 0 && !isGenerating ? (
+                  <div className="text-center py-8 text-slate-400">
+                    <div className="text-2xl mb-2">📝</div>
+                    <p className="text-sm">No descriptions generated yet</p>
+                    <button
+                      onClick={() => regenerateSection('descriptions')}
+                      className="mt-2 px-4 py-2 bg-green-500/20 text-green-400 rounded-lg text-sm font-medium hover:bg-green-500/30 transition-colors"
+                    >
+                      Generate Descriptions
+                    </button>
+                  </div>
+                ) : (
+                  creativeOptions.descriptions.map((desc) => (
+                    <div key={desc.id}>
+                      {editingItem?.item.id === desc.id ? (
+                        <div className="p-4 rounded-lg border-2 border-green-500 bg-green-500/10">
+                          <textarea
+                            value={editText}
+                            onChange={(e) => setEditText(e.target.value)}
+                            className="w-full px-3 py-3 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none resize-none transition-colors"
+                            rows={3}
+                            maxLength={250}
+                          />
+                          <div className="flex items-center justify-between mt-3">
+                            <span className="text-xs text-slate-400">{editText.length}/250</span>
+                            <div className="flex gap-2">
+                              <button 
+                                onClick={cancelEdit} 
+                                className="px-3 py-1 bg-slate-600 hover:bg-slate-500 text-white rounded text-xs transition-colors"
+                              >
+                                Cancel
+                              </button>
+                              <button 
+                                onClick={saveEdit} 
+                                className="px-3 py-1 bg-green-500 hover:bg-green-600 text-slate-900 rounded text-xs font-medium transition-colors"
+                              >
+                                Save
+                              </button>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
+                      ) : (
+                        <div 
+                          onClick={() => selectCreative('description', desc)}
+                          className={`p-4 rounded-lg border-2 cursor-pointer transition-all group ${
+                            desc.isSelected ? 'border-green-500 bg-green-500/10' : 'border-slate-600 hover:border-slate-500'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between">
+                            <p className="text-white flex-1 pr-4">{desc.content}</p>
+                            <div className="flex items-center gap-3 flex-shrink-0">
+                              <button
+                                onClick={(e) => { e.stopPropagation(); startEdit(desc, 'description'); }}
+                                className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-700 rounded transition-all"
+                                title="Edit description"
+                              >
+                                ✏️
+                              </button>
+                              <div className="text-right">
+                                <div className="text-xs text-slate-400">Score</div>
+                                <div className="text-green-400 font-semibold">{desc.score}%</div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 
@@ -427,7 +589,7 @@ export default function GenerateCreative() {
                   <button 
                     onClick={() => regenerateSection('ctas')}
                     disabled={generatingSection === 'ctas'}
-                    className="text-sm text-green-400 hover:text-green-300 flex items-center gap-1 disabled:opacity-50"
+                    className="text-sm text-green-400 hover:text-green-300 flex items-center gap-2 disabled:opacity-50 transition-colors"
                   >
                     {generatingSection === 'ctas' ? (
                       <>
@@ -440,51 +602,71 @@ export default function GenerateCreative() {
                   </button>
                 </div>
                 
-                <div className="grid grid-cols-1 gap-3">
-                  {creativeOptions.ctas.map((cta) => (
-                    <div key={cta.id}>
-                      {editingItem?.item.id === cta.id ? (
-                        <div className="p-3 rounded-lg border-2 border-green-500 bg-green-500/10">
-                          <input
-                            type="text"
-                            value={editText}
-                            onChange={(e) => setEditText(e.target.value)}
-                            className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none text-center font-medium"
-                            maxLength={25}
-                          />
-                          <div className="flex items-center justify-between mt-2">
-                            <span className="text-xs text-slate-400">{editText.length}/25</span>
-                            <div className="flex gap-2">
-                              <button onClick={cancelEdit} className="px-2 py-1 bg-slate-600 hover:bg-slate-500 text-white rounded text-xs">
-                                Cancel
-                              </button>
-                              <button onClick={saveEdit} className="px-2 py-1 bg-green-500 hover:bg-green-600 text-slate-900 rounded text-xs font-medium">
-                                Save
-                              </button>
+                <div className="space-y-3">
+                  {creativeOptions.ctas.length === 0 && !isGenerating ? (
+                    <div className="text-center py-8 text-slate-400">
+                      <div className="text-2xl mb-2">🎯</div>
+                      <p className="text-sm">No CTAs generated yet</p>
+                      <button
+                        onClick={() => regenerateSection('ctas')}
+                        className="mt-2 px-4 py-2 bg-green-500/20 text-green-400 rounded-lg text-sm font-medium hover:bg-green-500/30 transition-colors"
+                      >
+                        Generate CTAs
+                      </button>
+                    </div>
+                  ) : (
+                    creativeOptions.ctas.map((cta) => (
+                      <div key={cta.id}>
+                        {editingItem?.item.id === cta.id ? (
+                          <div className="p-3 rounded-lg border-2 border-green-500 bg-green-500/10">
+                            <input
+                              type="text"
+                              value={editText}
+                              onChange={(e) => setEditText(e.target.value)}
+                              className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none text-center font-medium transition-colors"
+                              maxLength={25}
+                            />
+                            <div className="flex items-center justify-between mt-2">
+                              <span className="text-xs text-slate-400">{editText.length}/25</span>
+                              <div className="flex gap-2">
+                                <button 
+                                  onClick={cancelEdit} 
+                                  className="px-2 py-1 bg-slate-600 hover:bg-slate-500 text-white rounded text-xs transition-colors"
+                                >
+                                  Cancel
+                                </button>
+                                <button 
+                                  onClick={saveEdit} 
+                                  className="px-2 py-1 bg-green-500 hover:bg-green-600 text-slate-900 rounded text-xs font-medium transition-colors"
+                                >
+                                  Save
+                                </button>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ) : (
-                        <div 
-                          onClick={() => selectCreative('cta', cta)}
-                          className={`p-3 rounded-lg border-2 cursor-pointer transition-all text-center group ${
-                            cta.isSelected ? 'border-green-500 bg-green-500/10' : 'border-slate-600 hover:border-slate-500'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="font-medium text-white flex-1">{cta.content}</div>
-                            <button
-                              onClick={(e) => { e.stopPropagation(); startEdit(cta, 'cta'); }}
-                              className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-700 rounded transition-all"
-                            >
-                              ✏️
-                            </button>
+                        ) : (
+                          <div 
+                            onClick={() => selectCreative('cta', cta)}
+                            className={`p-3 rounded-lg border-2 cursor-pointer transition-all text-center group ${
+                              cta.isSelected ? 'border-green-500 bg-green-500/10' : 'border-slate-600 hover:border-slate-500'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="font-medium text-white flex-1">{cta.content}</div>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); startEdit(cta, 'cta'); }}
+                                className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-700 rounded transition-all ml-2"
+                                title="Edit CTA"
+                              >
+                                ✏️
+                              </button>
+                            </div>
+                            <div className="text-green-400 text-xs mt-1">{cta.score}%</div>
                           </div>
-                          <div className="text-green-400 text-xs mt-1">{cta.score}%</div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                        )}
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
 
@@ -495,7 +677,7 @@ export default function GenerateCreative() {
                   <button 
                     onClick={() => regenerateSection('images')}
                     disabled={generatingSection === 'images'}
-                    className="text-sm text-green-400 hover:text-green-300 flex items-center gap-1 disabled:opacity-50"
+                    className="text-sm text-green-400 hover:text-green-300 flex items-center gap-2 disabled:opacity-50 transition-colors"
                   >
                     {generatingSection === 'images' ? (
                       <>
@@ -508,28 +690,46 @@ export default function GenerateCreative() {
                   </button>
                 </div>
                 
-                <div className="grid grid-cols-1 gap-3">
-                  {creativeOptions.images.map((image) => (
-                    <div 
-                      key={image.id}
-                      onClick={() => selectCreative('image', image)}
-                      className={`relative rounded-lg overflow-hidden border-2 cursor-pointer transition-all group ${
-                        image.isSelected ? 'border-green-500' : 'border-slate-600 hover:border-slate-500'
-                      }`}
-                    >
-                      <img src={image.imageUrl} alt={image.content} className="w-full h-24 object-cover" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                      <div className="absolute bottom-2 left-2 right-2">
-                        <div className="text-xs text-white font-medium">{image.content}</div>
-                        <div className="text-xs text-green-400">Score: {image.score}%</div>
-                      </div>
-                      {image.isSelected && (
-                        <div className="absolute top-2 right-2 bg-green-500 text-slate-900 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
-                          ✓
-                        </div>
-                      )}
+                <div className="space-y-3">
+                  {creativeOptions.images.length === 0 && !isGenerating ? (
+                    <div className="text-center py-8 text-slate-400">
+                      <div className="text-2xl mb-2">🖼️</div>
+                      <p className="text-sm">No images generated yet</p>
+                      <button
+                        onClick={() => regenerateSection('images')}
+                        className="mt-2 px-4 py-2 bg-green-500/20 text-green-400 rounded-lg text-sm font-medium hover:bg-green-500/30 transition-colors"
+                      >
+                        Generate Images
+                      </button>
                     </div>
-                  ))}
+                  ) : (
+                    creativeOptions.images.map((image) => (
+                      <div 
+                        key={image.id}
+                        onClick={() => selectCreative('image', image)}
+                        className={`relative rounded-lg overflow-hidden border-2 cursor-pointer transition-all group ${
+                          image.isSelected ? 'border-green-500' : 'border-slate-600 hover:border-slate-500'
+                        }`}
+                      >
+                        <img 
+                          src={image.imageUrl} 
+                          alt={image.content} 
+                          className="w-full h-24 object-cover" 
+                          loading="lazy"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                        <div className="absolute bottom-2 left-2 right-2">
+                          <div className="text-xs text-white font-medium">{image.content}</div>
+                          <div className="text-xs text-green-400">Score: {image.score}%</div>
+                        </div>
+                        {image.isSelected && (
+                          <div className="absolute top-2 right-2 bg-green-500 text-slate-900 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
+                            ✓
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </div>
@@ -551,28 +751,47 @@ export default function GenerateCreative() {
                   </div>
                 </div>
                 
-                {selectedCreatives.image && (
-                  <img src={selectedCreatives.image.imageUrl} alt="Preview" className="w-full h-32 object-cover rounded mb-3" />
+                {selectedCreatives.image ? (
+                  <img 
+                    src={selectedCreatives.image.imageUrl} 
+                    alt="Preview" 
+                    className="w-full h-32 object-cover rounded mb-3" 
+                  />
+                ) : (
+                  <div className="w-full h-32 bg-gray-200 rounded mb-3 flex items-center justify-center text-gray-400">
+                    <span>No image selected</span>
+                  </div>
                 )}
                 
-                {selectedCreatives.headline && (
+                {selectedCreatives.headline ? (
                   <h4 className="font-semibold text-sm mb-2">{selectedCreatives.headline.content}</h4>
+                ) : (
+                  <div className="h-4 bg-gray-200 rounded mb-2"></div>
                 )}
                 
-                {selectedCreatives.description && (
+                {selectedCreatives.description ? (
                   <p className="text-sm text-gray-700 mb-3">{selectedCreatives.description.content}</p>
+                ) : (
+                  <div className="space-y-1 mb-3">
+                    <div className="h-3 bg-gray-200 rounded"></div>
+                    <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                  </div>
                 )}
                 
-                {selectedCreatives.cta && (
+                {selectedCreatives.cta ? (
                   <button className="bg-blue-500 text-white px-4 py-2 rounded text-sm font-medium w-full">
                     {selectedCreatives.cta.content}
                   </button>
+                ) : (
+                  <div className="h-8 bg-gray-200 rounded w-full"></div>
                 )}
                 
                 {!isComplete && (
-                  <div className="text-center py-8 text-gray-400">
-                    <div className="text-2xl mb-2">👁️</div>
-                    <p className="text-sm">Select creative elements to see preview</p>
+                  <div className="text-center py-4 text-gray-400 absolute inset-0 bg-white/90 flex items-center justify-center rounded">
+                    <div>
+                      <div className="text-2xl mb-2">👁️</div>
+                      <p className="text-sm">Select creative elements to see preview</p>
+                    </div>
                   </div>
                 )}
               </div>
@@ -583,10 +802,17 @@ export default function GenerateCreative() {
               <h3 className="text-lg font-semibold mb-4">Selection Summary</h3>
               <div className="space-y-3 text-sm">
                 {Object.entries(selectedCreatives).map(([key, value]) => (
-                  <div key={key} className="flex justify-between">
+                  <div key={key} className="flex justify-between items-center">
                     <span className="text-slate-400 capitalize">{key}:</span>
-                    <span className={value ? 'text-green-400' : 'text-slate-500'}>
-                      {value ? '✓ Selected' : 'Not selected'}
+                    <span className={`flex items-center gap-1 ${value ? 'text-green-400' : 'text-slate-500'}`}>
+                      {value ? (
+                        <>
+                          <span>✓ Selected</span>
+                          <span className="text-xs bg-green-500/20 px-2 py-0.5 rounded">{value.score}%</span>
+                        </>
+                      ) : (
+                        'Not selected'
+                      )}
                     </span>
                   </div>
                 ))}
@@ -603,9 +829,31 @@ export default function GenerateCreative() {
                   <div>• Strong emotional appeal</div>
                   <div>• Clear value proposition</div>
                   <div>• Compelling call-to-action</div>
+                  <div className="mt-3 p-3 bg-green-500/10 border border-green-500/20 rounded text-green-400">
+                    Average Score: {Math.round(Object.values(selectedCreatives).reduce((sum, item) => sum + (item?.score || 0), 0) / Object.values(selectedCreatives).filter(Boolean).length)}%
+                  </div>
                 </div>
               </div>
             )}
+
+            {/* Generation Status */}
+            <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
+              <h3 className="text-lg font-semibold mb-4">Generation Status</h3>
+              <div className="space-y-3 text-sm">
+                {['headlines', 'descriptions', 'ctas', 'images'].map((section) => (
+                  <div key={section} className="flex justify-between items-center">
+                    <span className="text-slate-400 capitalize">{section}:</span>
+                    <span className={`text-xs px-2 py-1 rounded ${
+                      (creativeOptions as any)[section].length > 0 
+                        ? 'bg-green-500/20 text-green-400' 
+                        : 'bg-slate-600 text-slate-400'
+                    }`}>
+                      {(creativeOptions as any)[section].length > 0 ? 'Generated' : 'Pending'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -622,7 +870,7 @@ export default function GenerateCreative() {
           >
             {isGenerating ? 'Generating...' : 'Proceed to Campaign Approval →'}
           </button>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-4 text-sm text-slate-500">
             {isComplete ? 'Ready to review and launch your campaign!' : 'Select all creative elements to continue'}
           </p>
         </div>
