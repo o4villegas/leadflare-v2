@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
+import type { Route } from "./+types/createCampaign";
 
-export function meta() {
+export function meta({}: Route.MetaArgs) {
   return [
     { title: "Create Campaign - LeadFlare" },
     { name: "description", content: "Create a new AI-powered lead generation campaign" },
@@ -48,7 +49,7 @@ interface BusinessSuggestion {
   interests: string[];
   locations: string[];
   behaviors: string[];
-  recommendedBudget: number; // Keep for reference but don't set
+  recommendedBudget: number;
 }
 
 // Templates data
@@ -168,7 +169,7 @@ export default function CreateCampaign() {
     setErrors(prev => ({ ...prev, [field]: false }));
   };
 
-  // Apply template
+  // Apply template and hide selector
   const applyTemplate = (templateKey: string) => {
     const template = templates[templateKey];
     if (!template) return;
@@ -183,7 +184,7 @@ export default function CreateCampaign() {
       formFields: [...template.formFields]
     }));
 
-    setShowTemplates(false);
+    setShowTemplates(false); // Hide template selector after selection
   };
 
   // Get recommended budget for display
@@ -296,10 +297,9 @@ export default function CreateCampaign() {
            campaignData.privacyPolicyUrl;
   };
 
-  // Proceed to creative generation
+  // Navigation functions
   const proceedToCreative = () => {
     if (validateForm()) {
-      console.log('Campaign data:', campaignData);
       navigate('/generateCreative', { 
         state: { 
           campaignData: campaignData,
@@ -309,21 +309,57 @@ export default function CreateCampaign() {
     }
   };
 
-  // Go back to home
   const goBack = () => {
     navigate('/');
   };
 
+  const navigateToHome = () => {
+    navigate('/');
+  };
+
+  const navigateToCampaigns = () => {
+    navigate('/campaignManager');
+  };
+
+  const navigateToGenerateCreative = () => {
+    navigate('/generateCreative');
+  };
+
   return (
     <div className="bg-slate-900 text-white min-h-screen">
-      {/* Navigation */}
-      <nav className="border-b border-slate-700 bg-slate-900/80 backdrop-blur-sm px-6">
-        <div className="max-w-7xl mx-auto flex items-center justify-between h-24">
+      {/* Header */}
+      <header className="bg-slate-800/50 backdrop-blur border-b border-slate-700">
+        <div className="max-w-7xl mx-auto flex items-center justify-between h-24 px-6">
           <div className="flex items-center">
             <div className="w-20 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center font-bold text-slate-900 text-lg">
               LOGO
             </div>
           </div>
+          
+          <nav className="flex items-center gap-8">
+            <button 
+              onClick={navigateToHome}
+              className="text-slate-300 hover:text-white font-medium transition-colors"
+            >
+              Dashboard
+            </button>
+            <button 
+              onClick={navigateToCampaigns}
+              className="text-slate-300 hover:text-white font-medium transition-colors"
+            >
+              Campaigns
+            </button>
+            <button className="text-white font-semibold bg-green-500/20 px-4 py-2 rounded-lg">
+              Create Campaign
+            </button>
+            <button 
+              onClick={navigateToGenerateCreative}
+              className="text-slate-300 hover:text-white font-medium transition-colors"
+            >
+              Generate Creative
+            </button>
+          </nav>
+
           <div className="flex items-center gap-4">
             <button className="text-slate-400 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">
               Save Draft
@@ -336,7 +372,7 @@ export default function CreateCampaign() {
             </button>
           </div>
         </div>
-      </nav>
+      </header>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Page Header */}
@@ -348,53 +384,53 @@ export default function CreateCampaign() {
         {/* Quick Start Templates */}
         {showTemplates && (
           <div className="bg-slate-800 rounded-xl border border-slate-700 p-6 mb-8">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold">Quick Start Templates</h2>
               <button 
                 onClick={() => setShowTemplates(false)}
-                className="text-sm text-green-400 hover:text-green-300"
+                className="text-sm text-green-400 hover:text-green-300 transition-colors"
               >
-                Hide Templates
+                Skip Templates
               </button>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div 
-                className="template-card border-2 border-slate-600 rounded-lg p-4 cursor-pointer hover:border-green-500 transition-colors"
+                className="border-2 border-slate-600 rounded-lg p-6 cursor-pointer hover:border-green-500 transition-all duration-200 hover:bg-green-500/5"
                 onClick={() => applyTemplate('saas')}
               >
-                <h3 className="font-semibold mb-2">SaaS Lead Generation</h3>
-                <p className="text-sm text-slate-400 mb-3">Target business professionals interested in software solutions</p>
-                <div className="flex flex-wrap gap-1">
-                  <span className="bg-slate-700 text-slate-300 px-2 py-1 rounded text-xs">Technology</span>
-                  <span className="bg-slate-700 text-slate-300 px-2 py-1 rounded text-xs">Rec: $75/day</span>
-                  <span className="bg-slate-700 text-slate-300 px-2 py-1 rounded text-xs">Business Tools</span>
+                <h3 className="font-semibold mb-3">SaaS Lead Generation</h3>
+                <p className="text-sm text-slate-400 mb-4">Target business professionals interested in software solutions</p>
+                <div className="flex flex-wrap gap-2">
+                  <span className="bg-slate-700 text-slate-300 px-3 py-1 rounded-full text-xs">Technology</span>
+                  <span className="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-xs">Rec: $75/day</span>
+                  <span className="bg-slate-700 text-slate-300 px-3 py-1 rounded-full text-xs">Business Tools</span>
                 </div>
               </div>
               
               <div 
-                className="template-card border-2 border-slate-600 rounded-lg p-4 cursor-pointer hover:border-green-500 transition-colors"
+                className="border-2 border-slate-600 rounded-lg p-6 cursor-pointer hover:border-green-500 transition-all duration-200 hover:bg-green-500/5"
                 onClick={() => applyTemplate('realestate')}
               >
-                <h3 className="font-semibold mb-2">Real Estate Leads</h3>
-                <p className="text-sm text-slate-400 mb-3">Attract potential home buyers and sellers in your area</p>
-                <div className="flex flex-wrap gap-1">
-                  <span className="bg-slate-700 text-slate-300 px-2 py-1 rounded text-xs">Real Estate</span>
-                  <span className="bg-slate-700 text-slate-300 px-2 py-1 rounded text-xs">Rec: $50/day</span>
-                  <span className="bg-slate-700 text-slate-300 px-2 py-1 rounded text-xs">Local Targeting</span>
+                <h3 className="font-semibold mb-3">Real Estate Leads</h3>
+                <p className="text-sm text-slate-400 mb-4">Attract potential home buyers and sellers in your area</p>
+                <div className="flex flex-wrap gap-2">
+                  <span className="bg-slate-700 text-slate-300 px-3 py-1 rounded-full text-xs">Real Estate</span>
+                  <span className="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-xs">Rec: $50/day</span>
+                  <span className="bg-slate-700 text-slate-300 px-3 py-1 rounded-full text-xs">Local Targeting</span>
                 </div>
               </div>
               
               <div 
-                className="template-card border-2 border-slate-600 rounded-lg p-4 cursor-pointer hover:border-green-500 transition-colors"
+                className="border-2 border-slate-600 rounded-lg p-6 cursor-pointer hover:border-green-500 transition-all duration-200 hover:bg-green-500/5"
                 onClick={() => applyTemplate('healthcare')}
               >
-                <h3 className="font-semibold mb-2">Healthcare Services</h3>
-                <p className="text-sm text-slate-400 mb-3">Connect with patients seeking medical and wellness services</p>
-                <div className="flex flex-wrap gap-1">
-                  <span className="bg-slate-700 text-slate-300 px-2 py-1 rounded text-xs">Healthcare</span>
-                  <span className="bg-slate-700 text-slate-300 px-2 py-1 rounded text-xs">Rec: $60/day</span>
-                  <span className="bg-slate-700 text-slate-300 px-2 py-1 rounded text-xs">Health & Wellness</span>
+                <h3 className="font-semibold mb-3">Healthcare Services</h3>
+                <p className="text-sm text-slate-400 mb-4">Connect with patients seeking medical and wellness services</p>
+                <div className="flex flex-wrap gap-2">
+                  <span className="bg-slate-700 text-slate-300 px-3 py-1 rounded-full text-xs">Healthcare</span>
+                  <span className="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-xs">Rec: $60/day</span>
+                  <span className="bg-slate-700 text-slate-300 px-3 py-1 rounded-full text-xs">Health & Wellness</span>
                 </div>
               </div>
             </div>
@@ -415,11 +451,13 @@ export default function CreateCampaign() {
                     type="text"
                     value={campaignData.name}
                     onChange={(e) => updateField('name', e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-slate-400 focus:border-green-500 focus:outline-none"
+                    className={`w-full px-4 py-3 bg-slate-700 border rounded-md text-white placeholder-slate-400 focus:outline-none transition-colors ${
+                      errors.name ? 'border-red-500 focus:border-red-400' : 'border-slate-600 focus:border-green-500'
+                    }`}
                     placeholder="Enter campaign name"
                     maxLength={60}
                   />
-                  {errors.name && <p className="text-red-400 text-sm mt-1">Campaign name is required</p>}
+                  {errors.name && <p className="text-red-400 text-sm mt-2">Campaign name is required</p>}
                 </div>
 
                 <div>
@@ -427,7 +465,9 @@ export default function CreateCampaign() {
                   <select
                     value={campaignData.businessType}
                     onChange={(e) => updateField('businessType', e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none"
+                    className={`w-full px-4 py-3 bg-slate-700 border rounded-md text-white focus:outline-none transition-colors ${
+                      errors.businessType ? 'border-red-500 focus:border-red-400' : 'border-slate-600 focus:border-green-500'
+                    }`}
                   >
                     <option value="">Select business type</option>
                     <option value="Technology">Technology</option>
@@ -441,7 +481,7 @@ export default function CreateCampaign() {
                     <option value="Fitness & Wellness">Fitness & Wellness</option>
                     <option value="Legal Services">Legal Services</option>
                   </select>
-                  {errors.businessType && <p className="text-red-400 text-sm mt-1">Business type is required</p>}
+                  {errors.businessType && <p className="text-red-400 text-sm mt-2">Business type is required</p>}
                 </div>
               </div>
 
@@ -451,11 +491,13 @@ export default function CreateCampaign() {
                   value={campaignData.description}
                   onChange={(e) => updateField('description', e.target.value)}
                   rows={3}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-slate-400 focus:border-green-500 focus:outline-none resize-vertical"
+                  className={`w-full px-4 py-3 bg-slate-700 border rounded-md text-white placeholder-slate-400 focus:outline-none resize-vertical transition-colors ${
+                    errors.description ? 'border-red-500 focus:border-red-400' : 'border-slate-600 focus:border-green-500'
+                  }`}
                   placeholder="Describe your campaign goals and target outcome..."
                   maxLength={300}
                 />
-                {errors.description && <p className="text-red-400 text-sm mt-1">Campaign description is required</p>}
+                {errors.description && <p className="text-red-400 text-sm mt-2">Campaign description is required</p>}
               </div>
 
               {/* Budget Recommendation */}
@@ -477,29 +519,29 @@ export default function CreateCampaign() {
               <h2 className="text-xl font-semibold mb-6">Audience Targeting</h2>
               
               {/* Demographics */}
-              <div className="mb-6">
+              <div className="mb-8">
                 <h3 className="text-lg font-medium mb-4">Demographics</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
                     <label className="block text-sm font-medium mb-2">Age Range</label>
-                    <div className="flex gap-2 items-center">
+                    <div className="flex gap-3 items-center">
                       <input
                         type="number"
                         value={campaignData.ageMin}
                         onChange={(e) => updateField('ageMin', parseInt(e.target.value) || 18)}
                         min="13"
                         max="65"
-                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none"
+                        className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none transition-colors"
                       />
-                      <span className="text-slate-400">to</span>
+                      <span className="text-slate-400 flex-shrink-0">to</span>
                       <input
                         type="number"
                         value={campaignData.ageMax}
                         onChange={(e) => updateField('ageMax', parseInt(e.target.value) || 65)}
                         min="13"
                         max="65"
-                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none"
+                        className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none transition-colors"
                       />
                     </div>
                   </div>
@@ -509,7 +551,7 @@ export default function CreateCampaign() {
                     <select
                       value={campaignData.gender}
                       onChange={(e) => updateField('gender', e.target.value)}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none"
+                      className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none transition-colors"
                     >
                       <option value="all">All</option>
                       <option value="male">Male</option>
@@ -528,16 +570,18 @@ export default function CreateCampaign() {
                           e.currentTarget.value = '';
                         }
                       }}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-slate-400 focus:border-green-500 focus:outline-none"
+                      className={`w-full px-4 py-3 bg-slate-700 border rounded-md text-white placeholder-slate-400 focus:outline-none transition-colors ${
+                        errors.locations ? 'border-red-500 focus:border-red-400' : 'border-slate-600 focus:border-green-500'
+                      }`}
                     />
-                    {errors.locations && <p className="text-red-400 text-sm mt-1">At least one location is required</p>}
-                    <div className="flex flex-wrap gap-2 mt-2">
+                    {errors.locations && <p className="text-red-400 text-sm mt-2">At least one location is required</p>}
+                    <div className="flex flex-wrap gap-2 mt-3">
                       {campaignData.locations.map((location, index) => (
-                        <span key={index} className="bg-green-500/20 text-green-400 px-2 py-1 rounded text-sm flex items-center gap-1">
+                        <span key={index} className="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-sm flex items-center gap-2">
                           {location}
                           <button 
                             onClick={() => removeLocation(index)}
-                            className="text-green-400 hover:text-green-300"
+                            className="text-green-400 hover:text-green-300 transition-colors"
                           >
                             ×
                           </button>
@@ -549,7 +593,7 @@ export default function CreateCampaign() {
               </div>
 
               {/* Interests */}
-              <div className="mb-6">
+              <div className="mb-8">
                 <h3 className="text-lg font-medium mb-4">Interests</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
@@ -563,7 +607,7 @@ export default function CreateCampaign() {
                           e.currentTarget.value = '';
                         }
                       }}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-slate-400 focus:border-green-500 focus:outline-none"
+                      className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-slate-400 focus:border-green-500 focus:outline-none transition-colors"
                     />
                   </div>
                   <div>
@@ -573,7 +617,7 @@ export default function CreateCampaign() {
                         <button
                           key={interest}
                           onClick={() => addInterest(interest)}
-                          className="bg-slate-700 hover:bg-slate-600 text-white text-xs px-3 py-2 rounded transition-colors"
+                          className="bg-slate-700 hover:bg-slate-600 text-white text-xs px-3 py-2 rounded-full transition-colors"
                         >
                           + {interest}
                         </button>
@@ -583,11 +627,11 @@ export default function CreateCampaign() {
                 </div>
                 <div className="flex flex-wrap gap-2 mt-4">
                   {campaignData.interests.map((interest, index) => (
-                    <span key={index} className="bg-green-500/20 text-green-400 px-2 py-1 rounded text-sm flex items-center gap-1">
+                    <span key={index} className="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-sm flex items-center gap-2">
                       {interest}
                       <button 
                         onClick={() => removeInterest(index)}
-                        className="text-green-400 hover:text-green-300"
+                        className="text-green-400 hover:text-green-300 transition-colors"
                       >
                         ×
                       </button>
@@ -601,7 +645,7 @@ export default function CreateCampaign() {
                 <h3 className="text-lg font-medium mb-4">Behaviors</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {['Small business owners', 'Frequent travelers', 'Online shoppers', 'Technology early adopters'].map((behavior) => (
-                    <label key={behavior} className="flex items-center">
+                    <label key={behavior} className="flex items-center p-3 bg-slate-700/30 rounded-lg hover:bg-slate-700/50 transition-colors cursor-pointer">
                       <input 
                         type="checkbox" 
                         checked={campaignData.behaviors.includes(behavior)}
@@ -619,7 +663,7 @@ export default function CreateCampaign() {
             <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
               <h2 className="text-xl font-semibold mb-6">Placements & Optimization</h2>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
                   <h3 className="text-lg font-medium mb-4">Ad Placements</h3>
                   <div className="space-y-3">
@@ -629,7 +673,7 @@ export default function CreateCampaign() {
                       { key: 'facebook_marketplace', label: 'Facebook Marketplace' },
                       { key: 'instagram_stories', label: 'Instagram Stories' }
                     ].map((placement) => (
-                      <label key={placement.key} className="flex items-center">
+                      <label key={placement.key} className="flex items-center p-3 bg-slate-700/30 rounded-lg hover:bg-slate-700/50 transition-colors cursor-pointer">
                         <input 
                           type="checkbox" 
                           checked={campaignData.placements.includes(placement.key)}
@@ -648,7 +692,7 @@ export default function CreateCampaign() {
                     <select
                       value={campaignData.bidStrategy}
                       onChange={(e) => updateField('bidStrategy', e.target.value)}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none"
+                      className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none transition-colors"
                     >
                       <option value="LOWEST_COST_WITHOUT_CAP">Lowest Cost</option>
                       <option value="LOWEST_COST_WITH_BID_CAP">Bid Cap</option>
@@ -661,7 +705,7 @@ export default function CreateCampaign() {
                     <select
                       value={campaignData.optimizationGoal}
                       onChange={(e) => updateField('optimizationGoal', e.target.value)}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none"
+                      className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none transition-colors"
                     >
                       <option value="LEAD_GENERATION">Lead Generation</option>
                       <option value="CONVERSIONS">Conversions</option>
@@ -676,11 +720,11 @@ export default function CreateCampaign() {
             <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
               <h2 className="text-xl font-semibold mb-6">Lead Form Configuration</h2>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
                   <h3 className="text-lg font-medium mb-4">Form Fields</h3>
                   <div className="space-y-3">
-                    <label className="flex items-center text-slate-400">
+                    <label className="flex items-center p-3 bg-slate-700/30 rounded-lg text-slate-400 cursor-not-allowed">
                       <input type="checkbox" checked disabled className="mr-3 accent-green-500" />
                       <span className="text-sm">Email (Required)</span>
                     </label>
@@ -690,7 +734,7 @@ export default function CreateCampaign() {
                       { key: 'company_name', label: 'Company Name' },
                       { key: 'message', label: 'Message' }
                     ].map((field) => (
-                      <label key={field.key} className="flex items-center">
+                      <label key={field.key} className="flex items-center p-3 bg-slate-700/30 rounded-lg hover:bg-slate-700/50 transition-colors cursor-pointer">
                         <input 
                           type="checkbox" 
                           checked={campaignData.formFields.includes(field.key)}
@@ -710,10 +754,12 @@ export default function CreateCampaign() {
                       type="url"
                       value={campaignData.privacyPolicyUrl}
                       onChange={(e) => updateField('privacyPolicyUrl', e.target.value)}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-slate-400 focus:border-green-500 focus:outline-none"
+                      className={`w-full px-4 py-3 bg-slate-700 border rounded-md text-white placeholder-slate-400 focus:outline-none transition-colors ${
+                        errors.privacyPolicyUrl ? 'border-red-500 focus:border-red-400' : 'border-slate-600 focus:border-green-500'
+                      }`}
                       placeholder="https://yoursite.com/privacy"
                     />
-                    {errors.privacyPolicyUrl && <p className="text-red-400 text-sm mt-1">Privacy policy URL is required</p>}
+                    {errors.privacyPolicyUrl && <p className="text-red-400 text-sm mt-2">Privacy policy URL is required</p>}
                   </div>
 
                   <div>
@@ -721,10 +767,11 @@ export default function CreateCampaign() {
                     <textarea
                       value={campaignData.thankYouMessage}
                       onChange={(e) => updateField('thankYouMessage', e.target.value)}
-                      rows={3}
-                      className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-slate-400 focus:border-green-500 focus:outline-none resize-vertical"
+                      rows={4}
+                      className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-slate-400 focus:border-green-500 focus:outline-none resize-vertical transition-colors"
                       maxLength={150}
                     />
+                    <p className="text-xs text-slate-400 mt-1">{campaignData.thankYouMessage.length}/150 characters</p>
                   </div>
                 </div>
               </div>
@@ -737,12 +784,12 @@ export default function CreateCampaign() {
             <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
               <h3 className="text-lg font-semibold mb-4">Audience Insights</h3>
               
-              <div className="mb-4">
+              <div className="mb-6">
                 <div className="text-sm text-slate-400 mb-1">Estimated Audience Size</div>
                 <div className="text-2xl font-semibold text-green-400">{audienceSize}</div>
               </div>
               
-              <div className="mb-4">
+              <div className="mb-6">
                 <div className="text-sm text-slate-400 mb-1">Potential Weekly Reach</div>
                 <div className="text-lg font-medium text-slate-300">{weeklyReach}</div>
               </div>
@@ -786,7 +833,7 @@ export default function CreateCampaign() {
               </div>
             </div>
             
-            {/* Optimization Tips */}
+            {/* Next Steps */}
             <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
               <h3 className="text-lg font-semibold mb-4">Next Steps</h3>
               <div className="text-sm text-slate-400 leading-relaxed">
@@ -818,7 +865,7 @@ export default function CreateCampaign() {
           >
             Proceed to Creative Generation →
           </button>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-4 text-sm text-slate-500">
             {isFormComplete() ? 'Ready to create amazing ad content!' : 'Complete all required fields to continue'}
           </p>
         </div>
