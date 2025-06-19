@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import type { Route } from "./+types/approveLaunch";
 
-export default function ApproveLaunch() {
-  const location = useLocation();
-  const navigate = useNavigate();
-  
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Campaign Budget & Launch - LeadFlare" },
+    { name: "description", content: "Configure your budget settings and launch to Meta Ads Manager" },
+  ];
+}
+
+export default function ApproveLaunch({ navigate, location }: Route.ComponentProps) {
   // Get data from previous route (generateCreative)
-  const { campaignData: initialCampaignData, creatives } = location.state || {};
+  const { campaignData: initialCampaignData, creatives, selectedCreatives } = location?.state || {};
 
   // Campaign data - budget entered for first time
   const [campaignData, setCampaignData] = useState({
@@ -25,7 +29,7 @@ export default function ApproveLaunch() {
     optimizationGoal: "LEAD_GENERATION"
   });
 
-  const [selectedCreatives] = useState(creatives || {
+  const [selectedCreativesState] = useState(selectedCreatives || {
     headline: { content: "Transform Your Business Operations with AI", score: 94 },
     description: { content: "Streamline workflows with intelligent automation. Built for modern teams that need results fast.", score: 89 },
     cta: { content: "Start Free Trial", score: 96 },
@@ -36,8 +40,40 @@ export default function ApproveLaunch() {
   const [budgetAllocation, setBudgetAllocation] = useState({
     facebook_feeds: 50,
     instagram_feeds: 30,
-    facebook_marketplace: 20
+    facebook_marketplace: 20,
+    instagram_stories: 0
   });
+
+  // Recommended allocation based on business type
+  const getRecommendedAllocation = () => {
+    const recommendations = {
+      'Technology': {
+        facebook_feeds: 45,
+        instagram_feeds: 35,
+        facebook_marketplace: 20,
+        instagram_stories: 0
+      },
+      'Real Estate': {
+        facebook_feeds: 40,
+        instagram_feeds: 25,
+        facebook_marketplace: 35,
+        instagram_stories: 0
+      },
+      'Healthcare': {
+        facebook_feeds: 55,
+        instagram_feeds: 30,
+        facebook_marketplace: 15,
+        instagram_stories: 0
+      },
+      'Finance': {
+        facebook_feeds: 50,
+        instagram_feeds: 25,
+        facebook_marketplace: 25,
+        instagram_stories: 0
+      }
+    };
+    return recommendations[campaignData.businessType as keyof typeof recommendations] || recommendations.Technology;
+  };
 
   const [schedule, setSchedule] = useState({
     startDate: new Date().toISOString().split('T')[0],
@@ -73,6 +109,12 @@ export default function ApproveLaunch() {
   // Calculate remaining allocation
   const getRemainingAllocation = () => {
     return Math.max(0, 100 - getTotalAllocation());
+  };
+
+  // Reset to recommended allocation
+  const resetToRecommended = () => {
+    const recommended = getRecommendedAllocation();
+    setBudgetAllocation(recommended);
   };
 
   // Update budget allocation with auto-adjustment
@@ -214,7 +256,7 @@ export default function ApproveLaunch() {
     navigate('/generateCreative', { 
       state: { 
         campaignData: initialCampaignData, 
-        creatives: selectedCreatives 
+        selectedCreatives: selectedCreativesState 
       }
     });
   };
@@ -223,11 +265,27 @@ export default function ApproveLaunch() {
     // Save draft logic here
     console.log('Saving draft...', {
       campaignData,
-      selectedCreatives,
+      selectedCreatives: selectedCreativesState,
       budgetAllocation,
       schedule,
       bidSettings
     });
+  };
+
+  const navigateToHome = () => {
+    navigate('/');
+  };
+
+  const navigateToCampaigns = () => {
+    navigate('/campaignManager');
+  };
+
+  const navigateToCreateCampaign = () => {
+    navigate('/createCampaign');
+  };
+
+  const navigateToGenerateCreative = () => {
+    navigate('/generateCreative');
   };
 
   // Calculate projections and validation - moved after all function definitions
@@ -253,14 +311,45 @@ export default function ApproveLaunch() {
 
   return (
     <div className="bg-slate-900 text-white min-h-screen">
-      {/* Navigation */}
-      <nav className="border-b border-slate-700 bg-slate-900/80 backdrop-blur-sm px-6">
-        <div className="max-w-7xl mx-auto flex items-center justify-between h-24">
+      {/* Header */}
+      <header className="bg-slate-800/50 backdrop-blur border-b border-slate-700">
+        <div className="max-w-7xl mx-auto flex items-center justify-between h-24 px-6">
           <div className="flex items-center">
             <div className="w-20 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center font-bold text-slate-900 text-lg">
               LOGO
             </div>
           </div>
+          
+          <nav className="flex items-center gap-8">
+            <button 
+              onClick={navigateToHome}
+              className="text-slate-300 hover:text-white font-medium transition-colors"
+            >
+              Dashboard
+            </button>
+            <button 
+              onClick={navigateToCampaigns}
+              className="text-slate-300 hover:text-white font-medium transition-colors"
+            >
+              Campaigns
+            </button>
+            <button 
+              onClick={navigateToCreateCampaign}
+              className="text-slate-300 hover:text-white font-medium transition-colors"
+            >
+              Create Campaign
+            </button>
+            <button 
+              onClick={navigateToGenerateCreative}
+              className="text-slate-300 hover:text-white font-medium transition-colors"
+            >
+              Generate Creative
+            </button>
+            <button className="text-white font-semibold bg-green-500/20 px-4 py-2 rounded-lg">
+              Approve & Launch
+            </button>
+          </nav>
+
           <div className="flex items-center gap-4">
             <button 
               onClick={handleSaveDraft}
@@ -276,7 +365,7 @@ export default function ApproveLaunch() {
             </button>
           </div>
         </div>
-      </nav>
+      </header>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Page Header */}
@@ -343,14 +432,14 @@ export default function ApproveLaunch() {
                       step="0.01"
                       value={campaignData.budget || ''}
                       onChange={(e) => setCampaignData(prev => ({ ...prev, budget: parseFloat(e.target.value) || 0 }))}
-                      className={`w-full pl-8 pr-3 py-3 bg-slate-700 border rounded-md text-white text-lg font-semibold focus:outline-none ${
+                      className={`w-full pl-8 pr-3 py-3 bg-slate-700 border rounded-md text-white text-lg font-semibold focus:outline-none transition-colors ${
                         budgetErrors.length > 0 ? 'border-red-500 focus:border-red-500' : 'border-slate-600 focus:border-green-500'
                       }`}
                       placeholder="0.00"
                     />
                   </div>
                   {budgetErrors.length > 0 && (
-                    <div className="mt-1">
+                    <div className="mt-2">
                       {budgetErrors.map((error, index) => (
                         <p key={index} className="text-xs text-red-400">{error}</p>
                       ))}
@@ -366,7 +455,7 @@ export default function ApproveLaunch() {
                   <select
                     value={campaignData.budgetType}
                     onChange={(e) => setCampaignData(prev => ({ ...prev, budgetType: e.target.value }))}
-                    className="w-full px-3 py-3 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none"
+                    className="w-full px-3 py-3 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none transition-colors"
                   >
                     <option value="daily">Daily Budget</option>
                     <option value="lifetime">Lifetime Budget</option>
@@ -381,7 +470,7 @@ export default function ApproveLaunch() {
                   <select
                     value={campaignData.currency}
                     onChange={(e) => setCampaignData(prev => ({ ...prev, currency: e.target.value }))}
-                    className="w-full px-3 py-3 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none"
+                    className="w-full px-3 py-3 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none transition-colors"
                   >
                     <option value="USD">USD - US Dollar</option>
                     <option value="CAD">CAD - Canadian Dollar</option>
@@ -403,7 +492,7 @@ export default function ApproveLaunch() {
                     step="0.01"
                     value={bidSettings.campaignSpendingLimit || ''}
                     onChange={(e) => setBidSettings(prev => ({ ...prev, campaignSpendingLimit: parseFloat(e.target.value) || null }))}
-                    className="w-full pl-8 pr-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none"
+                    className="w-full pl-8 pr-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none transition-colors"
                     placeholder="No limit"
                   />
                 </div>
@@ -436,7 +525,15 @@ export default function ApproveLaunch() {
 
             {/* Budget Allocation Across Placements */}
             <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
-              <h2 className="text-xl font-semibold mb-6">Budget Allocation Across Placements</h2>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold">Budget Allocation Across Placements</h2>
+                <button
+                  onClick={resetToRecommended}
+                  className="px-4 py-2 bg-blue-500/20 text-blue-400 rounded-lg text-sm font-medium hover:bg-blue-500/30 transition-colors"
+                >
+                  Reset to Recommended
+                </button>
+              </div>
               
               {/* Allocation Progress Bar */}
               <div className="mb-6 p-4 bg-slate-700/50 rounded-lg">
@@ -550,7 +647,7 @@ export default function ApproveLaunch() {
                     type="date"
                     value={schedule.startDate}
                     onChange={(e) => setSchedule(prev => ({ ...prev, startDate: e.target.value }))}
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none"
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none transition-colors"
                   />
                 </div>
                 <div>
@@ -559,7 +656,7 @@ export default function ApproveLaunch() {
                     type="date"
                     value={schedule.endDate}
                     onChange={(e) => setSchedule(prev => ({ ...prev, endDate: e.target.value }))}
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none"
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none transition-colors"
                   />
                 </div>
               </div>
@@ -588,7 +685,7 @@ export default function ApproveLaunch() {
                           ...prev, 
                           dayparting: { ...prev.dayparting, hours: { ...prev.dayparting.hours, start: parseInt(e.target.value) }}
                         }))}
-                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none"
+                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none transition-colors"
                       >
                         {[...Array(24)].map((_, i) => (
                           <option key={i} value={i}>{i}:00</option>
@@ -603,7 +700,7 @@ export default function ApproveLaunch() {
                           ...prev, 
                           dayparting: { ...prev.dayparting, hours: { ...prev.dayparting.hours, end: parseInt(e.target.value) }}
                         }))}
-                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none"
+                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none transition-colors"
                       >
                         {[...Array(24)].map((_, i) => (
                           <option key={i} value={i}>{i}:00</option>
@@ -625,7 +722,7 @@ export default function ApproveLaunch() {
                   <select
                     value={bidSettings.strategy}
                     onChange={(e) => setBidSettings(prev => ({ ...prev, strategy: e.target.value }))}
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none"
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none transition-colors"
                   >
                     <option value="LOWEST_COST_WITHOUT_CAP">Lowest Cost (Recommended)</option>
                     <option value="LOWEST_COST_WITH_BID_CAP">Lowest Cost with Bid Cap</option>
@@ -638,7 +735,7 @@ export default function ApproveLaunch() {
                   <select
                     value={bidSettings.optimization}
                     onChange={(e) => setBidSettings(prev => ({ ...prev, optimization: e.target.value }))}
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none"
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none transition-colors"
                   >
                     <option value="LEAD_GENERATION">Lead Generation</option>
                     <option value="CONVERSIONS">Conversions</option>
@@ -667,7 +764,7 @@ export default function ApproveLaunch() {
                       value={bidSettings.bidCap || ''}
                       onChange={(e) => setBidSettings(prev => ({ ...prev, bidCap: parseFloat(e.target.value) || null }))}
                       placeholder="Enter maximum bid amount"
-                      className="w-full pl-8 pr-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none"
+                      className="w-full pl-8 pr-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none transition-colors"
                     />
                   </div>
                   <p className="text-xs text-slate-400 mt-1">Meta API: bid_amount - Maximum amount to bid per result</p>
@@ -686,7 +783,7 @@ export default function ApproveLaunch() {
                       value={bidSettings.targetCost || ''}
                       onChange={(e) => setBidSettings(prev => ({ ...prev, targetCost: parseFloat(e.target.value) || null }))}
                       placeholder="Enter target cost"
-                      className="w-full pl-8 pr-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none"
+                      className="w-full pl-8 pr-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none transition-colors"
                     />
                   </div>
                   <p className="text-xs text-slate-400 mt-1">Meta API: cost_per_action_type - Target cost per optimization event</p>
@@ -699,7 +796,7 @@ export default function ApproveLaunch() {
                   <select
                     value={bidSettings.pacing}
                     onChange={(e) => setBidSettings(prev => ({ ...prev, pacing: e.target.value }))}
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none"
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none transition-colors"
                   >
                     <option value="STANDARD">Standard (Recommended)</option>
                     <option value="ACCELERATED">Accelerated</option>
@@ -711,7 +808,7 @@ export default function ApproveLaunch() {
                   <select
                     value={bidSettings.attributionSpec}
                     onChange={(e) => setBidSettings(prev => ({ ...prev, attributionSpec: e.target.value }))}
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none"
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none transition-colors"
                   >
                     <option value="1_day_click">1-day click</option>
                     <option value="7_day_click">7-day click</option>
@@ -729,7 +826,7 @@ export default function ApproveLaunch() {
               <h2 className="text-xl font-semibold mb-6">Ad Placement Previews</h2>
               
               {/* Preview Navigation */}
-              <div className="flex gap-2 mb-6">
+              <div className="flex gap-2 mb-6 flex-wrap">
                 {previewOptions.map((option) => (
                   <button
                     key={option.key}
@@ -758,11 +855,11 @@ export default function ApproveLaunch() {
                         <div className="text-xs text-gray-500">Sponsored</div>
                       </div>
                     </div>
-                    <img src={selectedCreatives.image.imageUrl} alt="Preview" className="w-full h-40 object-cover rounded mb-3" />
-                    <h4 className="font-semibold text-sm mb-2">{selectedCreatives.headline.content}</h4>
-                    <p className="text-sm text-gray-700 mb-3">{selectedCreatives.description.content}</p>
+                    <img src={selectedCreativesState.image.imageUrl} alt="Preview" className="w-full h-40 object-cover rounded mb-3" />
+                    <h4 className="font-semibold text-sm mb-2">{selectedCreativesState.headline.content}</h4>
+                    <p className="text-sm text-gray-700 mb-3">{selectedCreativesState.description.content}</p>
                     <button className="bg-blue-500 text-white px-4 py-2 rounded text-sm font-medium w-full">
-                      {selectedCreatives.cta.content}
+                      {selectedCreativesState.cta.content}
                     </button>
                   </div>
                 )}
@@ -778,24 +875,24 @@ export default function ApproveLaunch() {
                         <div className="text-xs text-gray-500">Sponsored</div>
                       </div>
                     </div>
-                    <img src={selectedCreatives.image.imageUrl} alt="Preview" className="w-full h-40 object-cover rounded mb-3" />
+                    <img src={selectedCreativesState.image.imageUrl} alt="Preview" className="w-full h-40 object-cover rounded mb-3" />
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-6 h-6 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
                       <span className="font-semibold text-sm">yourbusiness</span>
                     </div>
-                    <p className="text-sm mb-2">{selectedCreatives.headline.content}</p>
-                    <p className="text-sm text-gray-600">{selectedCreatives.description.content}</p>
+                    <p className="text-sm mb-2">{selectedCreativesState.headline.content}</p>
+                    <p className="text-sm text-gray-600">{selectedCreativesState.description.content}</p>
                   </div>
                 )}
 
                 {currentPreview === 'facebook_marketplace' && (
                   <div className="border rounded-lg overflow-hidden">
-                    <img src={selectedCreatives.image.imageUrl} alt="Preview" className="w-full h-32 object-cover" />
+                    <img src={selectedCreativesState.image.imageUrl} alt="Preview" className="w-full h-32 object-cover" />
                     <div className="p-3">
-                      <h4 className="font-semibold text-sm mb-1">{selectedCreatives.headline.content}</h4>
+                      <h4 className="font-semibold text-sm mb-1">{selectedCreativesState.headline.content}</h4>
                       <p className="text-xs text-gray-600 mb-2">Your Business</p>
                       <button className="bg-blue-500 text-white px-3 py-1 rounded text-xs font-medium">
-                        {selectedCreatives.cta.content}
+                        {selectedCreativesState.cta.content}
                       </button>
                     </div>
                   </div>
@@ -803,13 +900,13 @@ export default function ApproveLaunch() {
 
                 {currentPreview === 'instagram_stories' && (
                   <div className="relative bg-gradient-to-b from-purple-400 to-pink-400 rounded-lg aspect-[9/16] max-h-80 overflow-hidden">
-                    <img src={selectedCreatives.image.imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                    <img src={selectedCreativesState.image.imageUrl} alt="Preview" className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     <div className="absolute bottom-4 left-4 right-4 text-white">
-                      <h4 className="font-bold text-sm mb-1">{selectedCreatives.headline.content}</h4>
-                      <p className="text-xs mb-3">{selectedCreatives.description.content}</p>
+                      <h4 className="font-bold text-sm mb-1">{selectedCreativesState.headline.content}</h4>
+                      <p className="text-xs mb-3">{selectedCreativesState.description.content}</p>
                       <button className="bg-white text-black px-4 py-2 rounded-full text-xs font-medium w-full">
-                        {selectedCreatives.cta.content}
+                        {selectedCreativesState.cta.content}
                       </button>
                     </div>
                   </div>
@@ -959,7 +1056,7 @@ export default function ApproveLaunch() {
              !isAllocationValid ? 'Fix Budget Allocation to Launch' :
              '🚀 Launch Campaign to Meta'}
           </button>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-4 text-sm text-slate-500">
             {budgetErrors.length > 0 ? 'Please resolve budget validation errors above' :
              campaignData.budget === 0 ? 'Campaign budget is required to proceed' :
              !isAllocationValid ? `Budget allocation must equal 100% (currently ${Math.round(totalAllocation)}%)` :
