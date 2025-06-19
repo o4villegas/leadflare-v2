@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
+import type { Route } from "./+types/campaignManager";
 
-export function meta() {
+export function meta({}: Route.MetaArgs) {
   return [
     { title: "Campaign Manager - LeadFlare" },
     { name: "description", content: "Manage and monitor your AI-powered lead generation campaigns" },
@@ -160,25 +161,6 @@ const mockCampaigns: Campaign[] = [
 
 export default function CampaignManager() {
   const navigate = useNavigate();
-
-  // Navigation functions for integration with routing system
-  const navigateToCreateCampaign = () => {
-    navigate('/createCampaign');
-  };
-
-  const navigateToHome = () => {
-    navigate('/');
-  };
-
-  const navigateToLeads = (campaignId: string) => {
-    // TODO: Replace with actual navigation logic
-    alert(`Navigate to: Lead Details for campaign ${campaignId}`);
-  };
-
-  const navigateToGenerateCreative = () => {
-    navigate('/generateCreative');
-  };
-  
   // State management
   const [campaigns, setCampaigns] = useState<Campaign[]>(mockCampaigns);
   const [filteredCampaigns, setFilteredCampaigns] = useState<Campaign[]>(mockCampaigns);
@@ -391,9 +373,23 @@ export default function CampaignManager() {
     }
   };
 
-  // Navigation wrapper
-  const createNewCampaign = () => {
-    navigateToCreateCampaign();
+  // Navigation functions
+  const navigateToHome = () => {
+    navigate('/');
+  };
+
+  const navigateToCreateCampaign = () => {
+    navigate('/createCampaign');
+  };
+
+  const navigateToGenerateCreative = () => {
+    navigate('/generateCreative');
+  };
+
+  const navigateToLeads = (campaignId: string) => {
+    navigate('/leadManagement', { 
+      state: { campaignId } 
+    });
   };
 
   // Mock performance breakdown data (replace with actual Meta API calls)
@@ -458,7 +454,7 @@ export default function CampaignManager() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
       {/* Header */}
       <header className="bg-slate-800/50 backdrop-blur border-b border-slate-700">
-        <div className="max-w-7xl mx-auto flex items-center justify-between h-24">
+        <div className="max-w-7xl mx-auto flex items-center justify-between h-24 px-6">
           <div className="flex items-center">
             <div className="w-20 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center font-bold text-slate-900 text-lg">
               LOGO
@@ -476,6 +472,12 @@ export default function CampaignManager() {
               Campaigns
             </button>
             <button 
+              onClick={navigateToCreateCampaign}
+              className="text-slate-300 hover:text-white font-medium transition-colors"
+            >
+              Create Campaign
+            </button>
+            <button 
               onClick={navigateToGenerateCreative}
               className="text-slate-300 hover:text-white font-medium transition-colors"
             >
@@ -484,7 +486,7 @@ export default function CampaignManager() {
           </nav>
 
           <button
-            onClick={createNewCampaign}
+            onClick={navigateToCreateCampaign}
             className="bg-green-500 hover:bg-green-600 text-slate-900 font-semibold px-6 py-3 rounded-lg transition-colors"
           >
             + New Campaign
@@ -510,14 +512,14 @@ export default function CampaignManager() {
                   placeholder="Search campaigns..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full md:w-64 px-4 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-slate-400 focus:border-green-500 focus:outline-none"
+                  className="w-full md:w-64 px-4 py-2 bg-slate-700 border border-slate-600 rounded-md text-white placeholder-slate-400 focus:border-green-500 focus:outline-none transition-colors"
                 />
               </div>
               
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
-                className="px-4 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none"
+                className="px-4 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:border-green-500 focus:outline-none transition-colors"
               >
                 <option value="all">All Statuses</option>
                 <option value="active">Active</option>
@@ -531,7 +533,7 @@ export default function CampaignManager() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white text-sm focus:border-green-500 focus:outline-none"
+                className="px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white text-sm focus:border-green-500 focus:outline-none transition-colors"
               >
                 <option value="name">Name</option>
                 <option value="type">Type</option>
@@ -558,7 +560,7 @@ export default function CampaignManager() {
               <h3 className="text-xl font-semibold mb-2 text-white">No campaigns found</h3>
               <p className="text-slate-400 mb-6">Try adjusting your search criteria or create a new campaign.</p>
               <button
-                onClick={createNewCampaign}
+                onClick={navigateToCreateCampaign}
                 className="bg-green-500 hover:bg-green-600 text-slate-900 font-semibold px-6 py-3 rounded-lg transition-colors"
               >
                 Create Your First Campaign
@@ -600,7 +602,7 @@ export default function CampaignManager() {
                     </div>
                   </div>
 
-                  {/* Horizontal Metrics Layout */}
+                  {/* Metrics Layout */}
                   <div className="space-y-2">
                     <div className="grid grid-cols-3 gap-4">
                       <div className="text-center">
@@ -650,7 +652,7 @@ export default function CampaignManager() {
                     </button>
                     
                     <button
-                      onClick={() => openLeadsModal(campaign)}
+                      onClick={() => navigateToLeads(campaign.id)}
                       className="px-3 py-2 bg-purple-500/20 text-purple-400 rounded-md text-xs font-medium hover:bg-purple-500/30 transition-colors"
                     >
                       👥 View Leads
@@ -672,13 +674,13 @@ export default function CampaignManager() {
         {/* Performance Modal - Meta Ads Manager Style */}
         {showPerformanceModal && selectedCampaign && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-4xl h-[80vh] flex flex-col">
-              <div className="p-4 border-b border-slate-700 flex-shrink-0">
+            <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-4xl max-h-[85vh] flex flex-col">
+              <div className="p-6 border-b border-slate-700 flex-shrink-0">
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-bold text-white">Performance Insights</h2>
                   <button
                     onClick={closeModals}
-                    className="text-slate-400 hover:text-white text-2xl"
+                    className="text-slate-400 hover:text-white text-2xl transition-colors"
                   >
                     ×
                   </button>
@@ -686,28 +688,28 @@ export default function CampaignManager() {
                 <p className="text-slate-300 mt-1 text-sm">{selectedCampaign.name}</p>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-4 space-y-6">
+              <div className="flex-1 overflow-y-auto p-6 space-y-6">
                 {/* Key Metrics: CTR, CPC, CPM, ROAS, Frequency */}
                 <div>
-                  <h3 className="text-lg font-semibold mb-3 text-white">Key Metrics</h3>
-                  <div className="grid grid-cols-5 gap-3">
-                    <div className="bg-slate-700/50 rounded-lg p-3 text-center">
+                  <h3 className="text-lg font-semibold mb-4 text-white">Key Metrics</h3>
+                  <div className="grid grid-cols-5 gap-4">
+                    <div className="bg-slate-700/50 rounded-lg p-4 text-center">
                       <div className="text-xl font-bold text-blue-400">{selectedCampaign.ctr}%</div>
                       <div className="text-xs text-slate-400">CTR</div>
                     </div>
-                    <div className="bg-slate-700/50 rounded-lg p-3 text-center">
+                    <div className="bg-slate-700/50 rounded-lg p-4 text-center">
                       <div className="text-xl font-bold text-green-400">${selectedCampaign.cpc}</div>
                       <div className="text-xs text-slate-400">CPC</div>
                     </div>
-                    <div className="bg-slate-700/50 rounded-lg p-3 text-center">
+                    <div className="bg-slate-700/50 rounded-lg p-4 text-center">
                       <div className="text-xl font-bold text-purple-400">${selectedCampaign.cpm}</div>
                       <div className="text-xs text-slate-400">CPM</div>
                     </div>
-                    <div className="bg-slate-700/50 rounded-lg p-3 text-center">
+                    <div className="bg-slate-700/50 rounded-lg p-4 text-center">
                       <div className="text-xl font-bold text-orange-400">{selectedCampaign.roas}x</div>
                       <div className="text-xs text-slate-400">ROAS</div>
                     </div>
-                    <div className="bg-slate-700/50 rounded-lg p-3 text-center">
+                    <div className="bg-slate-700/50 rounded-lg p-4 text-center">
                       <div className="text-xl font-bold text-yellow-400">{selectedCampaign.frequency}</div>
                       <div className="text-xs text-slate-400">Frequency</div>
                     </div>
@@ -716,7 +718,7 @@ export default function CampaignManager() {
 
                 {/* Time Series Chart */}
                 <div>
-                  <h3 className="text-lg font-semibold mb-3 text-white">7-Day Performance Trends</h3>
+                  <h3 className="text-lg font-semibold mb-4 text-white">7-Day Performance Trends</h3>
                   <div className="bg-slate-700/50 rounded-lg p-4">
                     <div className="space-y-2">
                       {getTimeSeriesData(selectedCampaign).map((day, index) => (
@@ -744,7 +746,7 @@ export default function CampaignManager() {
 
                 {/* Breakdown Views: Age, Gender, Location, Device, Placement */}
                 <div>
-                  <h3 className="text-lg font-semibold mb-3 text-white">Performance Breakdown</h3>
+                  <h3 className="text-lg font-semibold mb-4 text-white">Performance Breakdown</h3>
                   
                   <div className="flex gap-2 mb-4 flex-wrap">
                     {(['age', 'gender', 'location', 'device', 'placement'] as const).map((breakdown) => (
@@ -785,15 +787,15 @@ export default function CampaignManager() {
         {/* Edit Budget & Allocation Modal */}
         {showEditBudgetModal && selectedCampaign && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-2xl max-h-[80vh] flex flex-col">
-              <div className="p-4 border-b border-slate-700 flex-shrink-0">
+            <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-2xl max-h-[85vh] flex flex-col">
+              <div className="p-6 border-b border-slate-700 flex-shrink-0">
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-bold text-white">
                     {isDuplicating ? 'Duplicate & Launch Campaign' : 'Edit Budget & Allocation'}
                   </h2>
                   <button
                     onClick={closeModals}
-                    className="text-slate-400 hover:text-white text-xl"
+                    className="text-slate-400 hover:text-white text-xl transition-colors"
                   >
                     ×
                   </button>
@@ -803,11 +805,11 @@ export default function CampaignManager() {
                 </p>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-4">
+              <div className="flex-1 overflow-y-auto p-6">
                 <div className="space-y-6">
                   {/* Budget Section */}
                   <div>
-                    <h3 className="text-md font-semibold mb-3 text-white">Campaign Budget</h3>
+                    <h3 className="text-md font-semibold mb-4 text-white">Campaign Budget</h3>
                     <div className="space-y-4">
                       {!isDuplicating && (
                         <div>
@@ -832,7 +834,7 @@ export default function CampaignManager() {
                             min="5"
                             step="0.01"
                             defaultValue={selectedCampaign.budget}
-                            className="w-full pl-8 pr-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white font-semibold focus:border-green-500 focus:outline-none"
+                            className="w-full pl-8 pr-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white font-semibold focus:border-green-500 focus:outline-none transition-colors"
                             id="newBudget"
                           />
                         </div>
@@ -845,7 +847,7 @@ export default function CampaignManager() {
 
                   {/* Placement Allocation Section with Auto-Balance Slider */}
                   <div>
-                    <h3 className="text-md font-semibold mb-3 text-white">Budget Allocation by Placement</h3>
+                    <h3 className="text-md font-semibold mb-4 text-white">Budget Allocation by Placement</h3>
                     
                     {/* Total Allocation Progress */}
                     <div className="mb-4 p-3 bg-slate-700/50 rounded-lg">
@@ -940,7 +942,7 @@ export default function CampaignManager() {
                 </div>
               </div>
 
-              <div className="p-4 border-t border-slate-700 flex-shrink-0">
+              <div className="p-6 border-t border-slate-700 flex-shrink-0">
                 <div className="flex gap-3">
                   <button
                     onClick={closeModals}
@@ -983,13 +985,13 @@ export default function CampaignManager() {
         {/* View Leads Modal */}
         {showLeadsModal && selectedCampaign && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-3xl h-[75vh] flex flex-col">
-              <div className="p-4 border-b border-slate-700 flex-shrink-0">
+            <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-3xl max-h-[75vh] flex flex-col">
+              <div className="p-6 border-b border-slate-700 flex-shrink-0">
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-bold text-white">Campaign Leads</h2>
                   <button
                     onClick={closeModals}
-                    className="text-slate-400 hover:text-white text-xl"
+                    className="text-slate-400 hover:text-white text-xl transition-colors"
                   >
                     ×
                   </button>
@@ -997,7 +999,7 @@ export default function CampaignManager() {
                 <p className="text-slate-300 mt-1 text-sm">{selectedCampaign.name} • {selectedCampaign.leadsGenerated} total leads</p>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-4">
+              <div className="flex-1 overflow-y-auto p-6">
                 {selectedCampaign.leadsGenerated > 0 ? (
                   <div className="space-y-3">
                     {Array.from({ length: Math.min(selectedCampaign.leadsGenerated, 10) }, (_, index) => (
@@ -1058,7 +1060,7 @@ export default function CampaignManager() {
               </div>
 
               {selectedCampaign.leadsGenerated > 0 && (
-                <div className="p-4 border-t border-slate-700 flex-shrink-0">
+                <div className="p-6 border-t border-slate-700 flex-shrink-0">
                   <button
                     onClick={() => {
                       closeModals();
